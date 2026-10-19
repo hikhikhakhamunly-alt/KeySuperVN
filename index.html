@@ -186,8 +186,7 @@ function renderGrid(){
       </div></div>`;
   }).join("");
   document.querySelectorAll("[data-buy]").forEach(b=>b.onclick=()=>openBuy(b.dataset.buy));
-}
-function renderPresets(){
+}function renderPresets(){
   $("presets").innerHTML=PRESETS.map(v=>`<button class="chip" data-v="${v}">${fmt(v)}</button>`).join("");
   $("presets").querySelectorAll(".chip").forEach(c=>c.onclick=()=>{$("nap-amt").value=c.dataset.v;markPreset()});
 }
