@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Key Super VN</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <style>
 :root{--bg:#050914;--card:#0b1430;--line:#1c2b50;--txt:#eaf1ff;--mute:#8ea0c4;--acc:#3ea6ff;--ok:#2ee59d;--bad:#ff5c7a}
 *{box-sizing:border-box}
@@ -118,9 +119,10 @@ footer{text-align:center;color:var(--mute);font-size:13px;padding:30px 0 0;borde
 
 <script>
 /* ===== CẤU HÌNH ===== */
-const API_URL = "PASTE_APPS_SCRIPT_WEB_APP_URL_HERE"; // URL Web App của Google Apps Script
+const SB_URL = "https://raztcloppwdzqyshlepp.supabase.co";       // Project URL (Supabase → Settings → API)
+const SB_KEY = "sb_publishable_ZBNx15WHWgcQqQB2qvwjpA_nRjrep5W";  // anon public key
 const ACC = "1059886207";   // STK chính chủ
-const BIN = "970436";       // Mã BIN ngân hàng (mặc định Vietcombank, kiểm tra lại)
+const BIN = "970436";       // Vietcombank
 const PRESETS = [10000,20000,50000,100000,200000,500000];
 
 const DEFAULTS = [
@@ -130,6 +132,7 @@ const DEFAULTS = [
    pk:[{l:"1 Ngày",p:15000},{l:"1 Tuần",p:70000},{l:"1 Tháng",p:150000}]}
 ];
 
+const sb = (window.supabase && !SB_URL.startsWith("PASTE")) ? window.supabase.createClient(SB_URL, SB_KEY) : null;
 let products=[], cur=null, pkgIdx=0, stopWatch=null;
 const $ = id => document.getElementById(id);
 const fmt = n => Number(n).toLocaleString("vi-VN")+"đ";
@@ -145,15 +148,11 @@ function vietqr(amount,info){
 }
 function qrSvg(text){const q=qrcode(0,"M");q.addData(text);q.make();return q.createSvgTag({cellSize:5,margin:0})}
 
-/* ===== Dữ liệu (Apps Script) ===== */
-async function api(action, params={}){
-  if(API_URL.startsWith("PASTE")) throw new Error("chưa cấu hình API");
-  const url = API_URL+"?action="+action+"&"+new URLSearchParams(params);
-  const r = await fetch(url); return r.json();
-}
+/* ===== Dữ liệu (Supabase) ===== */
 async function loadProducts(){
-  try{ const d = await api("products"); products = (d.products&&d.products.length)? d.products : DEFAULTS; }
-  catch(e){ products = DEFAULTS; }
+  if(!sb){ products=DEFAULTS; return; }
+  const {data,error}=await sb.rpc("get_products");
+  products = (!error && data && data.length) ? data.map(p=>({...p,desc:p.descr})) : DEFAULTS;
 }
 
 /* ===== Render ===== */
@@ -227,11 +226,10 @@ $("ov").onclick=e=>{ if(e.target.id==="ov") closeModal(); };
 async function createOrder(){
   const pk=cur.pk[pkgIdx], code="KEY"+rnd(6);
   $("pay").innerHTML=`<p class="hint">Đang tạo đơn...</p>`;
-  try{
-    if(!API_URL.startsWith("PASTE")){
-      await fetch(API_URL,{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify({action:"order",code,product:cur.id,pkg:pk.l,amount:pk.p})});
-    }
-  }catch(e){}
+  if(sb){
+    const {error}=await sb.from("orders").insert({code,product:cur.id,pname:cur.name,pkg:pk.l,amount:pk.p,status:"pending"});
+    if(error){ $("pay").innerHTML=`<p class="hint">Không tạo được đơn, vui lòng thử lại hoặc nhắn admin.</p>`; return; }
+  }
   $("pay").innerHTML=`<div class="qr">${qrSvg(vietqr(pk.p,code))}</div>
     <div>Số tiền: <b>${fmt(pk.p)}</b></div>
     <div style="margin-top:6px">Nội dung CK (bắt buộc): <span class="code">${code}</span></div>
@@ -241,13 +239,14 @@ async function createOrder(){
   watchOrder(code);
 }
 function watchOrder(code){
-  if(API_URL.startsWith("PASTE")) return;
+  if(!sb) return;
   stopWatch=setInterval(async()=>{
     try{
-      const d=await api("order",{code});
-      if(d.order&&d.order.status==="done"&&d.order.key){
+      const {data}=await sb.rpc("get_order",{p_code:code});
+      const o=Array.isArray(data)?data[0]:data;
+      if(o&&o.status==="done"&&o.key_value){
         clearInterval(stopWatch); stopWatch=null;
-        $("status").innerHTML=`<b style="color:var(--ok)">✅ Thanh toán thành công! Key của bạn:</b><div class="keybox">${d.order.key}</div>`;
+        $("status").innerHTML=`<b style="color:var(--ok)">✅ Thanh toán thành công! Key của bạn:</b><div class="keybox">${o.key_value}</div>`;
       }
     }catch(e){}
   },5000);
