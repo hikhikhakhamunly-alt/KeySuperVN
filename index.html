@@ -205,7 +205,7 @@ function napQR(){
 /* ===== Mua key ===== */
 function openBuy(id){
   cur=products.find(p=>p.id===id); if(!cur) return;
-  pkgIdx=0; drawBuy(); $("ov").classList.add("open");
+  pkgIdx=Math.max(0,cur.pk.findIndex(x=>((cur.pkg_stock||{})[x.l]||0)>0)); drawBuy(); $("ov").classList.add("open");
 }
 function drawBuy(){
   const pk=cur.pk[pkgIdx];
@@ -213,7 +213,7 @@ function drawBuy(){
     <h2 style="margin:0 0 6px">${cur.name}</h2>
     <p class="hint" style="margin:0 0 6px">${cur.desc||""}</p>
     <label>Chọn gói</label>
-    <div class="chips">${cur.pk.map((x,i)=>`<button class="chip ${i===pkgIdx?"on":""}" data-i="${i}">${x.l} · ${fmt(x.p)}</button>`).join("")}</div>
+    <div class="chips">${cur.pk.map((x,i)=>{const n=(cur.pkg_stock||{})[x.l]||0;return `<button class="chip ${i===pkgIdx?"on":""}" data-i="${i}" ${n>0?"":"disabled"} style="${n>0?"":"opacity:.4"}">${x.l} · ${fmt(x.p)}${n>0?"":" (hết)"}</button>`}).join("")}</div>
     <button class="btn" id="mk">Tạo mã QR thanh toán ${fmt(pk.p)}</button>
     <div id="pay"></div>`;
   $("xc").onclick=closeModal;
@@ -225,6 +225,7 @@ $("ov").onclick=e=>{ if(e.target.id==="ov") closeModal(); };
 
 async function createOrder(){
   const pk=cur.pk[pkgIdx], code="KEY"+rnd(6);
+  if(!((cur.pkg_stock||{})[pk.l]>0)) return;
   $("pay").innerHTML=`<p class="hint">Đang tạo đơn...</p>`;
   if(sb){
     const {error}=await sb.from("orders").insert({code,product:cur.id,pname:cur.name,pkg:pk.l,amount:pk.p,status:"pending"});
