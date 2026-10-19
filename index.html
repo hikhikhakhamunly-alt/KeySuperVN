@@ -51,6 +51,7 @@ h2.sec{margin:34px 0 4px;font-size:24px}
 .chips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 16px}
 .chip{background:#0a1226;border:1px solid var(--line);color:var(--txt);padding:10px 14px;border-radius:12px;cursor:pointer;font-size:14px}
 .chip.on{border-color:var(--acc);box-shadow:0 0 0 1px var(--acc) inset;color:#fff;background:#13245a}
+.chip:disabled{opacity:.4;cursor:not-allowed}
 input{width:100%;background:#0a1226;color:var(--txt);border:1px solid var(--line);border-radius:12px;padding:12px 14px;font:inherit;font-size:15px}
 label{display:block;font-size:13px;color:var(--mute);margin:6px 0}
 .overlay{position:fixed;inset:0;background:rgba(2,4,12,.72);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;padding:16px;z-index:20}
@@ -119,16 +120,16 @@ footer{text-align:center;color:var(--mute);font-size:13px;padding:30px 0 0;borde
 
 <script>
 /* ===== CẤU HÌNH ===== */
-const SB_URL = "https://raztcloppwdzqyshlepp.supabase.co";       // Project URL (Supabase → Settings → API)
-const SB_KEY = "sb_publishable_ZBNx15WHWgcQqQB2qvwjpA_nRjrep5W";  // anon public key
-const ACC = "1059886207";   // STK chính chủ
-const BIN = "970436";       // Vietcombank
+const SB_URL = "https://raztcloppwdzqyshlepp.supabase.co";
+const SB_KEY = "sb_publishable_ZBNx15WHWgcQqQB2qvwjpA_nRjrep5W";
+const ACC = "1059886207";
+const BIN = "970436";
 const PRESETS = [10000,20000,50000,100000,200000,500000];
 
 const DEFAULTS = [
-  {id:"novax-ios", name:"NovaX Proxy – iOS", cat:"PROXY IOS", desc:"Proxy ipa · Hỗ trợ iOS Antiband", style:"novax", stock:0, img:"",
-   pk:[{l:"1 Ngày",p:20000},{l:"1 Tuần",p:70000},{l:"1 Tháng",p:150000}]},
-  {id:"innova-cheat", name:"INNOVA CHEAT", cat:"MENU IOS", desc:"Hỗ trợ tải trực tiếp, cần dùng chứng chỉ", style:"innova", stock:0, img:"",
+  {id:"novax-ios", name:"NovaX Proxy – iOS", cat:"PROXY IOS", desc:"Proxy ipa · Hỗ trợ iOS Antiband", style:"novax", stock:0, img:"", pkg_stock:{},
+   pk:[{l:"1 Ngày",p:15000},{l:"1 Tuần",p:70000},{l:"1 Tháng",p:100000},{l:"Vĩnh viễn",p:200000}]},
+  {id:"innova-cheat", name:"INNOVA CHEAT", cat:"MENU IOS", desc:"Hỗ trợ tải trực tiếp, cần dùng chứng chỉ", style:"innova", stock:0, img:"", pkg_stock:{},
    pk:[{l:"1 Ngày",p:15000},{l:"1 Tuần",p:70000},{l:"1 Tháng",p:150000}]}
 ];
 
@@ -137,6 +138,7 @@ let products=[], cur=null, pkgIdx=0, stopWatch=null;
 const $ = id => document.getElementById(id);
 const fmt = n => Number(n).toLocaleString("vi-VN")+"đ";
 const rnd = n => Array.from({length:n},()=>"ABCDEFGHJKLMNPQRSTUVWXYZ23456789"[Math.random()*30|0]).join("");
+const pkgCount = (p, label) => ((p.pkg_stock||{})[label]||0);
 
 /* ===== VietQR (chuẩn EMVCo) ===== */
 function tlv(id,v){return id+String(v.length).padStart(2,"0")+v}
@@ -169,7 +171,7 @@ function renderGrid(){
         <span class="badge">${p.cat||""}</span>
         <h3>${p.name}</h3>
         <p>${p.desc||""}</p>
-        <div class="row"><span class="price">Từ ${from}</span><span class="stock ${st>0?"in":"out"}">${st>0?"Còn "+st+" key":"Hết hàng"}</span></div>
+        <div class="row"><span class="price">Từ ${from}</span><span class="stock ${st>0?"in":"out"}">${st>0?"Còn hàng":"Hết hàng"}</span></div>
         <button class="btn" data-buy="${p.id}" ${st>0?"":"disabled"}>Mua key</button>
       </div></div>`;
   }).join("");
@@ -205,16 +207,21 @@ function napQR(){
 /* ===== Mua key ===== */
 function openBuy(id){
   cur=products.find(p=>p.id===id); if(!cur) return;
-  pkgIdx=Math.max(0,cur.pk.findIndex(x=>((cur.pkg_stock||{})[x.l]||0)>0)); drawBuy(); $("ov").classList.add("open");
+  pkgIdx=Math.max(0,cur.pk.findIndex(x=>pkgCount(cur,x.l)>0));
+  drawBuy(); $("ov").classList.add("open");
 }
 function drawBuy(){
   const pk=cur.pk[pkgIdx];
+  const chips = cur.pk.map((x,i)=>{
+    const n=pkgCount(cur,x.l);
+    return `<button class="chip ${i===pkgIdx?"on":""}" data-i="${i}" ${n>0?"":"disabled"}>${x.l} · ${fmt(x.p)} · ${n>0?"còn "+n+" key":"hết"}</button>`;
+  }).join("");
   $("modal").innerHTML=`<button class="x" id="xc">×</button>
     <h2 style="margin:0 0 6px">${cur.name}</h2>
     <p class="hint" style="margin:0 0 6px">${cur.desc||""}</p>
     <label>Chọn gói</label>
-    <div class="chips">${cur.pk.map((x,i)=>{const n=(cur.pkg_stock||{})[x.l]||0;return `<button class="chip ${i===pkgIdx?"on":""}" data-i="${i}" ${n>0?"":"disabled"} style="${n>0?"":"opacity:.4"}">${x.l} · ${fmt(x.p)}${n>0?"":" (hết)"}</button>`}).join("")}</div>
-    <button class="btn" id="mk">Tạo mã QR thanh toán ${fmt(pk.p)}</button>
+    <div class="chips">${chips}</div>
+    <button class="btn" id="mk" ${pkgCount(cur,pk.l)>0?"":"disabled"}>Tạo mã QR thanh toán ${fmt(pk.p)}</button>
     <div id="pay"></div>`;
   $("xc").onclick=closeModal;
   document.querySelectorAll("#modal [data-i]").forEach(b=>b.onclick=()=>{pkgIdx=Number(b.dataset.i);drawBuy()});
@@ -225,7 +232,7 @@ $("ov").onclick=e=>{ if(e.target.id==="ov") closeModal(); };
 
 async function createOrder(){
   const pk=cur.pk[pkgIdx], code="KEY"+rnd(6);
-  if(!((cur.pkg_stock||{})[pk.l]>0)) return;
+  if(pkgCount(cur,pk.l)<=0) return;
   $("pay").innerHTML=`<p class="hint">Đang tạo đơn...</p>`;
   if(sb){
     const {error}=await sb.from("orders").insert({code,product:cur.id,pname:cur.name,pkg:pk.l,amount:pk.p,status:"pending"});
