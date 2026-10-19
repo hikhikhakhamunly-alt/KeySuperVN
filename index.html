@@ -9,8 +9,7 @@
 <style>
 :root{--bg:#050914;--card:#0b1430;--line:#1c2b50;--txt:#eaf1ff;--mute:#8ea0c4;--acc:#3ea6ff;--ok:#2ee59d;--bad:#ff5c7a}
 *{box-sizing:border-box}
-body{margin:0;min-height:100vh;color:var(--txt);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
-  background:radial-gradient(900px 500px at 10% -10%,#1d4ed855,transparent 60%),radial-gradient(800px 500px at 100% 10%,#7c3aed44,transparent 60%),var(--bg);background-attachment:fixed}
+body{margin:0;min-height:100vh;color:var(--txt);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:radial-gradient(900px 500px at 10% -10%,#1d4ed855,transparent 60%),radial-gradient(800px 500px at 100% 10%,#7c3aed44,transparent 60%),var(--bg);background-attachment:fixed}
 header{position:sticky;top:0;z-index:5;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:14px 22px;background:rgba(5,9,20,.75);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
 .logo{font-weight:900;font-size:22px;letter-spacing:1px}
 .rainbow{background:linear-gradient(90deg,#3ea6ff,#a855f7,#22d3ee,#f472b6,#3ea6ff);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shift 6s linear infinite}
@@ -79,6 +78,7 @@ footer{text-align:center;color:var(--mute);font-size:13px;padding:30px 0 0;borde
     <a data-s="prod">Sản phẩm</a>
     <a data-s="nap">Nạp ví</a>
     <a data-s="guides">Hướng dẫn</a>
+    <a data-s="downloads">Tải phần mềm</a>
     <a data-s="support">Hỗ trợ</a>
   </nav>
 </header>
@@ -114,6 +114,12 @@ footer{text-align:center;color:var(--mute);font-size:13px;padding:30px 0 0;borde
     <div class="grid" id="guides-grid"><div class="panel hint">Đang tải hướng dẫn...</div></div>
   </section>
 
+  <section id="sec-downloads" hidden>
+    <h2 class="sec">Link tải phần mềm</h2>
+    <p class="sub">Thông tin, mô tả và link tải chính thức do admin cập nhật.</p>
+    <div class="grid" id="downloads-grid"><div class="panel hint">Đang tải danh sách phần mềm...</div></div>
+  </section>
+
   <section id="sec-support" hidden>
     <div class="panel">
       <h2>Liên hệ admin</h2>
@@ -145,6 +151,7 @@ const DEFAULTS = [
 const sb = (window.supabase && !SB_URL.startsWith("PASTE")) ? window.supabase.createClient(SB_URL, SB_KEY) : null;
 let products=[], cur=null, pkgIdx=0, stopWatch=null;
 let guides=[];
+let downloadItems=[];
 const $ = id => document.getElementById(id);
 const fmt = n => Number(n).toLocaleString("vi-VN")+"đ";
 const rnd = n => Array.from({length:n},()=>"ABCDEFGHJKLMNPQRSTUVWXYZ23456789"[Math.random()*30|0]).join("");
@@ -167,7 +174,7 @@ async function loadProducts(){
   products = (!error && data && data.length) ? data.map(p=>({...p,desc:p.descr})) : DEFAULTS;
 }
 
-/* ===== Render ===== */
+/* ===== Render sản phẩm ===== */
 function renderGrid(){
   $("grid").innerHTML = products.map(p=>{
     const st=Number(p.stock||0);
@@ -186,7 +193,8 @@ function renderGrid(){
       </div></div>`;
   }).join("");
   document.querySelectorAll("[data-buy]").forEach(b=>b.onclick=()=>openBuy(b.dataset.buy));
-}function renderPresets(){
+}
+function renderPresets(){
   $("presets").innerHTML=PRESETS.map(v=>`<button class="chip" data-v="${v}">${fmt(v)}</button>`).join("");
   $("presets").querySelectorAll(".chip").forEach(c=>c.onclick=()=>{$("nap-amt").value=c.dataset.v;markPreset()});
 }
@@ -194,11 +202,12 @@ function markPreset(){const v=String(Number($("nap-amt").value));$("presets").qu
 
 /* ===== Điều hướng ===== */
 function show(s){
-  const map={home:"sec-home",prod:"sec-home",nap:"sec-nap",guides:"sec-guides",support:"sec-support"};
-  ["sec-home","sec-nap","sec-guides","sec-support"].forEach(id=>$(id).hidden=id!==map[s]);
+  const map={home:"sec-home",prod:"sec-home",nap:"sec-nap",guides:"sec-guides",downloads:"sec-downloads",support:"sec-support"};
+  ["sec-home","sec-nap","sec-guides","sec-downloads","sec-support"].forEach(id=>$(id).hidden=id!==map[s]);
   document.querySelectorAll("nav a").forEach(a=>a.classList.toggle("on",a.dataset.s===s));
   if(s==="prod") $("prod").scrollIntoView({behavior:"smooth"}); else window.scrollTo({top:0});
   if(s==="guides") loadGuides();
+  if(s==="downloads") loadSoftwareDownloads();
 }
 document.querySelectorAll("nav a").forEach(a=>a.onclick=()=>show(a.dataset.s));
 
@@ -216,6 +225,21 @@ async function loadGuides(){
     return `<article class="card"><div>${url?`<video class="guide-video" controls preload="metadata" playsinline src="${escHtml(url)}">Trình duyệt không hỗ trợ video.</video>`:'<div class="thumb">VIDEO</div>'}</div><div class="cbody"><h3>${escHtml(g.title)}</h3><p class="guide-desc">${escHtml(g.description||"")}</p></div></article>`;
   }).join("")||'<div class="panel hint">Chưa có video hướng dẫn. Admin sẽ cập nhật tại trang quản trị.</div>';
 }
+
+/* ===== Danh sách link tải phần mềm công khai ===== */
+async function loadSoftwareDownloads(){
+  const host=$("downloads-grid");
+  if(!sb){host.innerHTML='<div class="panel hint">Chưa kết nối được dữ liệu phần mềm.</div>';return;}
+  const {data,error}=await sb.from("software_downloads").select("id,title,description,download_url,image_url,created_at").eq("is_published",true).order("created_at",{ascending:false});
+  if(error){host.innerHTML='<div class="panel hint">Không tải được danh sách phần mềm. Vui lòng kiểm tra bảng software_downloads trong Supabase.</div>';return;}
+  downloadItems=data||[];
+  host.innerHTML=downloadItems.map(d=>{
+    const url=safePublicUrl(d.download_url), image=safePublicUrl(d.image_url);
+    const visual=image?`<div class="thumb"><img src="${escHtml(image)}" alt="${escHtml(d.title)}" loading="lazy"></div>`:`<div class="thumb t-generic">DOWNLOAD</div>`;
+    return `<article class="card">${visual}<div class="cbody"><h3>${escHtml(d.title)}</h3><p class="guide-desc">${escHtml(d.description||"")}</p>${url?`<a class="btn" href="${escHtml(url)}" target="_blank" rel="noopener noreferrer" style="text-decoration:none">Tải phần mềm</a>`:'<span class="hint">Link tải hiện không hợp lệ.</span>'}</div></article>`;
+  }).join("")||'<div class="panel hint">Chưa có phần mềm được xuất bản.</div>';
+}
+function safePublicUrl(v){try{const u=new URL(String(v||""));return ["https:","http:"].includes(u.protocol)?u.href:"";}catch{return "";}}
 
 /* ===== Nạp ví ===== */
 function napQR(){
