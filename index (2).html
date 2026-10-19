@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Key Super VN</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+<style>
+:root{--bg:#050914;--card:#0b1430;--line:#1c2b50;--txt:#eaf1ff;--mute:#8ea0c4;--acc:#3ea6ff;--ok:#2ee59d;--bad:#ff5c7a}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;color:var(--txt);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  background:radial-gradient(900px 500px at 10% -10%,#1d4ed855,transparent 60%),radial-gradient(800px 500px at 100% 10%,#7c3aed44,transparent 60%),var(--bg);background-attachment:fixed}
+header{position:sticky;top:0;z-index:5;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:14px 22px;background:rgba(5,9,20,.75);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.logo{font-weight:900;font-size:22px;letter-spacing:1px}
+.rainbow{background:linear-gradient(90deg,#3ea6ff,#a855f7,#22d3ee,#f472b6,#3ea6ff);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shift 6s linear infinite}
+@keyframes shift{to{background-position:300% 0}}
+nav{display:flex;gap:6px;flex-wrap:wrap}
+nav a{color:var(--mute);text-decoration:none;padding:8px 12px;border-radius:10px;font-size:14px;cursor:pointer}
+nav a.on,nav a:hover{color:#fff;background:#13224a}
+main{max-width:1100px;margin:0 auto;padding:20px 18px 70px}
+.hero{text-align:center;padding:50px 0 34px}
+.hero h1{font-size:clamp(32px,6vw,58px);margin:0 0 12px;line-height:1.1;font-weight:900}
+.hero p{color:var(--mute);margin:0 0 22px}
+.pills{display:flex;justify-content:center;gap:10px;flex-wrap:wrap}
+.pill{font-size:13px;color:#cfe0ff;border:1px solid var(--line);padding:6px 12px;border-radius:999px;background:#0a1530}
+h2.sec{margin:34px 0 4px;font-size:24px}
+.sub{color:var(--mute);margin:0 0 18px;font-size:14px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:20px}
+.card{background:linear-gradient(180deg,#101d3c,#0a1226);border:1px solid var(--line);border-radius:18px;overflow:hidden;transition:transform .25s,box-shadow .25s,border-color .25s}
+.card:hover{transform:translateY(-4px);border-color:#3ea6ff66;box-shadow:0 14px 40px -12px #3ea6ff55}
+.thumb{height:160px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:30px;letter-spacing:2px;position:relative;overflow:hidden}
+.thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.t-novax{background:radial-gradient(circle at 30% 20%,#2f6bff,#0b1d55 60%,#02050f);color:#a8d8ff;text-shadow:0 0 20px #3ea6ff}
+.t-innova{background:radial-gradient(circle at 50% 40%,#16a34a,#052e16 60%,#02050f);color:#9ff5c0;text-shadow:0 0 20px #22c55e}
+.t-generic{background:linear-gradient(135deg,#312e81,#0f172a);color:#d8ccff}
+.cbody{padding:16px 18px 18px}
+.badge{display:inline-block;font-size:11px;letter-spacing:.5px;padding:4px 9px;border-radius:7px;border:1px solid var(--line);color:var(--acc);margin-bottom:10px}
+.cbody h3{margin:0 0 6px;font-size:18px}
+.cbody p{margin:0 0 14px;color:var(--mute);font-size:13px;min-height:36px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.price{font-weight:800;color:var(--acc);font-size:16px}
+.stock{font-size:12px;padding:3px 8px;border-radius:6px}
+.in{color:var(--ok);background:#0f2e26}.out{color:var(--bad);background:#2e1019}
+.btn{display:inline-block;width:100%;margin-top:14px;text-align:center;background:linear-gradient(135deg,#2563eb,#7c3aed);color:#fff;border:0;padding:12px;border-radius:12px;font-weight:700;font-size:15px;cursor:pointer;transition:filter .2s,opacity .2s}
+.btn:hover{filter:brightness(1.12)}
+.btn:disabled{opacity:.35;cursor:not-allowed;filter:none}
+.btn.ghost{background:#101c36;border:1px solid var(--line)}
+.panel{background:linear-gradient(180deg,#0f1b36,#0a1226);border:1px solid var(--line);border-radius:18px;padding:24px;margin-top:20px}
+.panel h2{margin:0 0 8px;font-size:21px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 16px}
+.chip{background:#0a1226;border:1px solid var(--line);color:var(--txt);padding:10px 14px;border-radius:12px;cursor:pointer;font-size:14px}
+.chip.on{border-color:var(--acc);box-shadow:0 0 0 1px var(--acc) inset;color:#fff;background:#13245a}
+input{width:100%;background:#0a1226;color:var(--txt);border:1px solid var(--line);border-radius:12px;padding:12px 14px;font:inherit;font-size:15px}
+label{display:block;font-size:13px;color:var(--mute);margin:6px 0}
+.overlay{position:fixed;inset:0;background:rgba(2,4,12,.72);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;padding:16px;z-index:20}
+.overlay.open{display:flex}
+.modal{background:#0b1430;border:1px solid var(--line);border-radius:20px;max-width:460px;width:100%;max-height:92vh;overflow:auto;padding:24px;position:relative;box-shadow:0 30px 80px -20px #000}
+.x{position:absolute;right:14px;top:10px;background:none;border:0;color:var(--mute);font-size:26px;cursor:pointer}
+.qr{background:#fff;border-radius:14px;padding:12px;display:inline-block;margin:14px 0}
+.qr svg{display:block;width:230px;height:230px}
+.code{font-family:ui-monospace,Consolas,monospace;font-size:18px;font-weight:800;color:var(--ok);letter-spacing:1px}
+.note{font-size:12px;color:var(--mute);margin-top:10px;line-height:1.6}
+.keybox{font-family:ui-monospace,Consolas,monospace;background:#06101f;border:1px dashed var(--ok);color:var(--ok);padding:12px;border-radius:12px;word-break:break-all;margin-top:10px}
+.zalo{display:block;text-align:center;margin-top:12px;background:#0068ff;color:#fff;text-decoration:none;padding:12px;border-radius:12px;font-weight:700}
+.hint{color:var(--mute);font-size:13px}
+footer{text-align:center;color:var(--mute);font-size:13px;padding:30px 0 0;border-top:1px solid var(--line);margin-top:50px}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo rainbow">KEY SUPER VN</div>
+  <nav>
+    <a data-s="home" class="on">Trang chủ</a>
+    <a data-s="prod">Sản phẩm</a>
+    <a data-s="nap">Nạp ví</a>
+    <a data-s="support">Hỗ trợ</a>
+  </nav>
+</header>
+
+<main>
+  <section id="sec-home">
+    <div class="hero">
+      <h1 class="rainbow">Key bản quyền &amp; kỹ thuật số</h1>
+      <p>Key nhanh · Giá tốt · Giao key tự động sau khi nhận tiền</p>
+      <div class="pills"><span class="pill">⚡ Kích hoạt nhanh</span><span class="pill">🛡 Bảo hành trọn gói</span><span class="pill">💳 Thanh toán VietQR</span><span class="pill">🎧 Hỗ trợ 24/7</span></div>
+    </div>
+    <h2 class="sec" id="prod">Sản phẩm nổi bật</h2>
+    <p class="sub">Chọn gói phù hợp rồi quét mã VietQR để thanh toán.</p>
+    <div class="grid" id="grid"></div>
+  </section>
+
+  <section id="sec-nap" hidden>
+    <div class="panel">
+      <h2>Nạp tiền ví – tạo mã VietQR</h2>
+      <p class="hint">Quét mã bằng bất kỳ ứng dụng ngân hàng nào. Mệnh giá từ 10.000đ đến 500.000đ.</p>
+      <label>Mệnh giá nhanh</label>
+      <div class="chips" id="presets"></div>
+      <label>Số tiền (VNĐ)</label>
+      <input id="nap-amt" type="number" min="10000" max="500000" step="1000" value="50000">
+      <div style="margin-top:14px"><button class="btn" id="nap-btn">Tạo mã VietQR</button></div>
+      <div id="nap-out"></div>
+    </div>
+  </section>
+
+  <section id="sec-support" hidden>
+    <div class="panel">
+      <h2>Liên hệ admin</h2>
+      <p class="hint">Hỗ trợ nhanh qua Zalo, phản hồi trong vài phút.</p>
+      <a class="zalo" href="https://zalo.me/0338432921" target="_blank" rel="noopener">Nhắn admin qua Zalo · 0338432921</a>
+    </div>
+  </section>
+
+  <footer>© Key Super VN · Mọi thắc mắc vui lòng nhắn Zalo admin</footer>
+</main>
+
+<div class="overlay" id="ov"><div class="modal" id="modal"></div></div>
+
+<script>
+/* ===== CẤU HÌNH ===== */
+const API_URL = "PASTE_APPS_SCRIPT_WEB_APP_URL_HERE"; // URL Web App của Google Apps Script
+const ACC = "1059886207";   // STK chính chủ
+const BIN = "970436";       // Mã BIN ngân hàng (mặc định Vietcombank, kiểm tra lại)
+const PRESETS = [10000,20000,50000,100000,200000,500000];
+
+const DEFAULTS = [
+  {id:"novax-ios", name:"NovaX Proxy – iOS", cat:"PROXY IOS", desc:"Proxy ipa · Hỗ trợ iOS Antiband", style:"novax", stock:0, img:"",
+   pk:[{l:"1 Ngày",p:20000},{l:"1 Tuần",p:70000},{l:"1 Tháng",p:150000}]},
+  {id:"innova-cheat", name:"INNOVA CHEAT", cat:"MENU IOS", desc:"Hỗ trợ tải trực tiếp, cần dùng chứng chỉ", style:"innova", stock:0, img:"",
+   pk:[{l:"1 Ngày",p:15000},{l:"1 Tuần",p:70000},{l:"1 Tháng",p:150000}]}
+];
+
+let products=[], cur=null, pkgIdx=0, stopWatch=null;
+const $ = id => document.getElementById(id);
+const fmt = n => Number(n).toLocaleString("vi-VN")+"đ";
+const rnd = n => Array.from({length:n},()=>"ABCDEFGHJKLMNPQRSTUVWXYZ23456789"[Math.random()*30|0]).join("");
+
+/* ===== VietQR (chuẩn EMVCo) ===== */
+function tlv(id,v){return id+String(v.length).padStart(2,"0")+v}
+function crc16(s){let c=0xFFFF;for(let i=0;i<s.length;i++){c^=s.charCodeAt(i)<<8;for(let j=0;j<8;j++)c=(c&0x8000)?((c<<1)^0x1021):(c<<1);c&=0xFFFF}return c.toString(16).toUpperCase().padStart(4,"0")}
+function vietqr(amount,info){
+  const m38=tlv("00","A000000727")+tlv("01",tlv("00",BIN)+tlv("01",ACC))+tlv("02","QRIBFTTA");
+  let s=tlv("00","01")+tlv("01","12")+tlv("38",m38)+tlv("52","0000")+tlv("53","704")+tlv("54",String(amount))+tlv("58","VN")+tlv("62",tlv("08",info.slice(0,25)));
+  s+="6304"; return s+crc16(s);
+}
+function qrSvg(text){const q=qrcode(0,"M");q.addData(text);q.make();return q.createSvgTag({cellSize:5,margin:0})}
+
+/* ===== Dữ liệu (Apps Script) ===== */
+async function api(action, params={}){
+  if(API_URL.startsWith("PASTE")) throw new Error("chưa cấu hình API");
+  const url = API_URL+"?action="+action+"&"+new URLSearchParams(params);
+  const r = await fetch(url); return r.json();
+}
+async function loadProducts(){
+  try{ const d = await api("products"); products = (d.products&&d.products.length)? d.products : DEFAULTS; }
+  catch(e){ products = DEFAULTS; }
+}
+
+/* ===== Render ===== */
+function renderGrid(){
+  $("grid").innerHTML = products.map(p=>{
+    const st=Number(p.stock||0);
+    const from=p.pk&&p.pk.length?fmt(Math.min(...p.pk.map(x=>x.p))):"";
+    const thumb = p.img
+      ? `<img src="${p.img}" alt="${p.name}">`
+      : `<div class="t-${p.style||"generic"}" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center">${(p.name||"").split(" ")[0].toUpperCase()}</div>`;
+    return `<div class="card">
+      <div class="thumb">${thumb}</div>
+      <div class="cbody">
+        <span class="badge">${p.cat||""}</span>
+        <h3>${p.name}</h3>
+        <p>${p.desc||""}</p>
+        <div class="row"><span class="price">Từ ${from}</span><span class="stock ${st>0?"in":"out"}">${st>0?"Còn "+st+" key":"Hết hàng"}</span></div>
+        <button class="btn" data-buy="${p.id}" ${st>0?"":"disabled"}>Mua key</button>
+      </div></div>`;
+  }).join("");
+  document.querySelectorAll("[data-buy]").forEach(b=>b.onclick=()=>openBuy(b.dataset.buy));
+}
+function renderPresets(){
+  $("presets").innerHTML=PRESETS.map(v=>`<button class="chip" data-v="${v}">${fmt(v)}</button>`).join("");
+  $("presets").querySelectorAll(".chip").forEach(c=>c.onclick=()=>{$("nap-amt").value=c.dataset.v;markPreset()});
+}
+function markPreset(){const v=String(Number($("nap-amt").value));$("presets").querySelectorAll(".chip").forEach(c=>c.classList.toggle("on",c.dataset.v===v))}
+
+/* ===== Điều hướng ===== */
+function show(s){
+  const map={home:"sec-home",prod:"sec-home",nap:"sec-nap",support:"sec-support"};
+  ["sec-home","sec-nap","sec-support"].forEach(id=>$(id).hidden=id!==map[s]);
+  document.querySelectorAll("nav a").forEach(a=>a.classList.toggle("on",a.dataset.s===s));
+  if(s==="prod") $("prod").scrollIntoView({behavior:"smooth"}); else window.scrollTo({top:0});
+}
+document.querySelectorAll("nav a").forEach(a=>a.onclick=()=>show(a.dataset.s));
+
+/* ===== Nạp ví ===== */
+function napQR(){
+  let amt=Math.round(Number($("nap-amt").value)||0);
+  amt=Math.min(500000,Math.max(10000,amt));
+  $("nap-amt").value=amt; markPreset();
+  const info="NAP"+rnd(6);
+  $("nap-out").innerHTML=`<div class="qr">${qrSvg(vietqr(amt,info))}</div>
+    <div>Số tiền: <b>${fmt(amt)}</b></div>
+    <div style="margin-top:6px">Nội dung CK: <span class="code">${info}</span></div>
+    <div class="note">Ghi đúng nội dung chuyển khoản để được cộng tiền.</div>`;
+}
+
+/* ===== Mua key ===== */
+function openBuy(id){
+  cur=products.find(p=>p.id===id); if(!cur) return;
+  pkgIdx=0; drawBuy(); $("ov").classList.add("open");
+}
+function drawBuy(){
+  const pk=cur.pk[pkgIdx];
+  $("modal").innerHTML=`<button class="x" id="xc">×</button>
+    <h2 style="margin:0 0 6px">${cur.name}</h2>
+    <p class="hint" style="margin:0 0 6px">${cur.desc||""}</p>
+    <label>Chọn gói</label>
+    <div class="chips">${cur.pk.map((x,i)=>`<button class="chip ${i===pkgIdx?"on":""}" data-i="${i}">${x.l} · ${fmt(x.p)}</button>`).join("")}</div>
+    <button class="btn" id="mk">Tạo mã QR thanh toán ${fmt(pk.p)}</button>
+    <div id="pay"></div>`;
+  $("xc").onclick=closeModal;
+  document.querySelectorAll("#modal [data-i]").forEach(b=>b.onclick=()=>{pkgIdx=Number(b.dataset.i);drawBuy()});
+  $("mk").onclick=createOrder;
+}
+function closeModal(){ $("ov").classList.remove("open"); if(stopWatch){clearInterval(stopWatch);stopWatch=null} }
+$("ov").onclick=e=>{ if(e.target.id==="ov") closeModal(); };
+
+async function createOrder(){
+  const pk=cur.pk[pkgIdx], code="KEY"+rnd(6);
+  $("pay").innerHTML=`<p class="hint">Đang tạo đơn...</p>`;
+  try{
+    if(!API_URL.startsWith("PASTE")){
+      await fetch(API_URL,{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify({action:"order",code,product:cur.id,pkg:pk.l,amount:pk.p})});
+    }
+  }catch(e){}
+  $("pay").innerHTML=`<div class="qr">${qrSvg(vietqr(pk.p,code))}</div>
+    <div>Số tiền: <b>${fmt(pk.p)}</b></div>
+    <div style="margin-top:6px">Nội dung CK (bắt buộc): <span class="code">${code}</span></div>
+    <div class="note">Key sẽ hiện ở đây ngay khi hệ thống xác nhận thanh toán. Đừng đóng cửa sổ này.</div>
+    <div id="status" class="hint" style="margin-top:10px">⏳ Đang chờ thanh toán...</div>
+    <a class="zalo" href="https://zalo.me/0338432921" target="_blank" rel="noopener">Liên hệ admin</a>`;
+  watchOrder(code);
+}
+function watchOrder(code){
+  if(API_URL.startsWith("PASTE")) return;
+  stopWatch=setInterval(async()=>{
+    try{
+      const d=await api("order",{code});
+      if(d.order&&d.order.status==="done"&&d.order.key){
+        clearInterval(stopWatch); stopWatch=null;
+        $("status").innerHTML=`<b style="color:var(--ok)">✅ Thanh toán thành công! Key của bạn:</b><div class="keybox">${d.order.key}</div>`;
+      }
+    }catch(e){}
+  },5000);
+}
+
+/* ===== Khởi động ===== */
+renderPresets(); markPreset();
+$("nap-btn").onclick=napQR;
+$("nap-amt").oninput=markPreset;
+(async()=>{ await loadProducts(); renderGrid(); })();
+</script>
+</body>
+</html>
