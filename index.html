@@ -79,6 +79,12 @@ footer{text-align:center;color:var(--mute);font-size:13px;padding:30px 0 0;borde
     <a data-s="downloads">Link tải phần mềm</a>
     <a data-s="support">Hỗ trợ</a>
   </nav>
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+    <span id="auth-name" class="hint"></span>
+    <button id="auth-btn" class="chip">Đăng nhập / Đăng ký</button>
+    <button id="hist-btn" class="chip" hidden>Lịch sử mua</button>
+    <button id="logout-btn" class="chip" hidden>Đăng xuất</button>
+  </div>
 </header>
 
 <main>
@@ -130,13 +136,15 @@ footer{text-align:center;color:var(--mute);font-size:13px;padding:30px 0 0;borde
 </main>
 
 <div class="overlay" id="ov"><div class="modal" id="modal"></div></div>
+<div class="overlay" id="auth-ov"><div class="modal" id="auth-modal"></div></div>
+<div class="overlay" id="hist-ov"><div class="modal" id="hist-modal"></div></div>
 
 <script>
 /* ===== CẤU HÌNH ===== */
-const SB_URL = "https://raztcloppwdzqyshlepp.supabase.co";
-const SB_KEY = "sb_publishable_ZBNx15WHWgcQqQB2qvwjpA_nRjrep5W";
-const ACC = "8940322166";
-const BIN = "970418";
+const SB_URL = "https://raztcloppwdzqyshlepp.supabase.co";       // Project URL (Supabase → Settings → API)
+const SB_KEY = "sb_publishable_ZBNx15WHWgcQqQB2qvwjpA_nRjrep5W";  // anon public key
+const ACC = "96247KEYSUPER01";   // STK chính chủ
+const BIN = "970418";       // BIDV
 const PRESETS = [10000,20000,50000,100000,200000,500000];
 
 const DEFAULTS = [
@@ -242,7 +250,8 @@ async function createOrder(){
   if(!((cur.pkg_stock||{})[pk.l]>0)) return;
   $("pay").innerHTML=`<p class="hint">Đang tạo đơn...</p>`;
   if(sb){
-    const {error}=await sb.from("orders").insert({code,product:cur.id,pname:cur.name,pkg:pk.l,amount:pk.p,status:"pending"});
+    const uid=(await sb.auth.getSession()).data.session?.user?.id||null;
+    const {error}=await sb.from("orders").insert({code,product:cur.id,pname:cur.name,pkg:pk.l,amount:pk.p,status:"pending",user_id:uid});
     if(error){ $("pay").innerHTML=`<p class="hint">Không tạo được đơn, vui lòng thử lại hoặc nhắn admin.</p>`; return; }
   }
   $("pay").innerHTML=`<div class="qr">${qrSvg(vietqr(pk.p,code))}</div>
@@ -267,21 +276,6 @@ function watchOrder(code){
   },5000);
 }
 
-/* ===== Copy key ===== */
-function copyKey(){
-  const txt=document.getElementById("key-txt").textContent.trim();
-  const btn=document.getElementById("copy-btn");
-  const done=()=>{btn.textContent="Đã copy ✓";setTimeout(()=>btn.textContent="Copy",2000);};
-  if(navigator.clipboard&&navigator.clipboard.writeText){
-    navigator.clipboard.writeText(txt).then(done).catch(()=>fallbackCopy(txt,done));
-  } else fallbackCopy(txt,done);
-}
-function fallbackCopy(txt,done){
-  const ta=document.createElement("textarea"); ta.value=txt; document.body.appendChild(ta);
-  ta.select(); try{document.execCommand("copy");done();}catch(e){alert("Không copy được, hãy chọn và copy thủ công.");}
-  ta.remove();
-}
-
 /* ===== Hướng dẫn & link tải (từ trang quản trị) ===== */
 async function loadExtras(){
   if(!sb) return;
@@ -297,10 +291,103 @@ async function loadExtras(){
   }).join("")||'<p class="hint">Chưa có link tải.</p>';
 }
 
+/* ===== Copy key ===== */
+function copyKey(){
+  const txt=document.getElementById("key-txt").textContent.trim();
+  const btn=document.getElementById("copy-btn");
+  const done=()=>{btn.textContent="Đã copy ✓";setTimeout(()=>btn.textContent="Copy",2000);};
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(txt).then(done).catch(()=>fallbackCopy(txt,done));
+  } else fallbackCopy(txt,done);
+}
+function fallbackCopy(txt,done){
+  const ta=document.createElement("textarea"); ta.value=txt; document.body.appendChild(ta);
+  ta.select(); try{document.execCommand("copy");done();}catch(e){alert("Không copy được, hãy chọn và copy thủ công.");}
+  ta.remove();
+}
+
+/* ===== Đăng ký / đăng nhập khách ===== */
+let authMode="register";
+function openAuth(){ $("auth-ov").classList.add("open"); drawAuth(); }
+function closeAuth(){ $("auth-ov").classList.remove("open"); }
+function drawAuth(msg=""){
+  const reg = authMode==="register";
+  $("auth-modal").innerHTML=`<button class="x" id="ax">×</button>
+    <h2 style="margin:0 0 6px">${reg?"Tạo tài khoản Key Super VN":"Đăng nhập Key Super VN"}</h2>
+    <p class="hint" style="margin:0 0 10px">${reg?"Đăng ký để theo dõi đơn hàng và nhận hỗ trợ nhanh hơn.":"Đăng nhập bằng email và mật khẩu đã đăng ký."}</p>
+    ${reg?`<label>Tên hiển thị</label><input id="a-name" placeholder="Tên của bạn">`:""}
+    <label>Email</label><input id="a-email" type="email" placeholder="ban@email.com" autocomplete="email">
+    <label>Mật khẩu</label><input id="a-pass" type="password" placeholder="Ít nhất 6 ký tự" autocomplete="${reg?"new-password":"current-password"}">
+    ${reg?`<label>Xác nhận mật khẩu</label><input id="a-pass2" type="password" placeholder="Nhập lại mật khẩu">`:""}
+    <button class="btn" id="a-submit" style="margin-top:14px">${reg?"Tạo tài khoản":"Đăng nhập"}</button>
+    <p class="hint" id="a-msg" style="margin-top:10px">${msg}</p>
+    <p class="hint" style="text-align:center;margin-top:12px">${reg?'Đã có tài khoản? <a href="#" id="a-switch" style="color:var(--acc)">Đăng nhập</a>':'Chưa có tài khoản? <a href="#" id="a-switch" style="color:var(--acc)">Đăng ký</a>'}</p>`;
+  $("ax").onclick=closeAuth;
+  $("a-switch").onclick=e=>{e.preventDefault();authMode=reg?"login":"register";drawAuth();};
+  $("a-submit").onclick=submitAuth;
+}
+async function submitAuth(){
+  if(!sb) return $("a-msg").textContent="Chưa kết nối hệ thống. Vui lòng thử lại sau.";
+  const email=$("a-email").value.trim(), pass=$("a-pass").value;
+  if(!email||!pass) return $("a-msg").textContent="Nhập email và mật khẩu.";
+  if(authMode==="register"){
+    const name=$("a-name").value.trim();
+    if(!name) return $("a-msg").textContent="Nhập tên hiển thị.";
+    if(pass.length<6) return $("a-msg").textContent="Mật khẩu cần ít nhất 6 ký tự.";
+    if(pass!==$("a-pass2").value) return $("a-msg").textContent="Mật khẩu xác nhận không khớp.";
+    const {data,error}=await sb.auth.signUp({email,password:pass,options:{data:{name}}});
+    if(error) return $("a-msg").textContent="Lỗi: "+error.message;
+    if(data.session){ closeAuth(); return; }
+    return $("a-msg").textContent="Đã gửi email xác nhận. Vui lòng kiểm tra hộp thư rồi đăng nhập.";
+  } else {
+    const {error}=await sb.auth.signInWithPassword({email,password:pass});
+    if(error) return $("a-msg").textContent="Email hoặc mật khẩu không đúng.";
+    closeAuth();
+  }
+}
+function renderAuthBar(user){
+  if(user){
+    $("auth-btn").hidden=true; $("logout-btn").hidden=false; $("hist-btn").hidden=false;
+    $("auth-name").textContent="Xin chào, "+(user.user_metadata?.name||user.email);
+  } else {
+    $("auth-btn").hidden=false; $("logout-btn").hidden=true; $("hist-btn").hidden=true; $("auth-name").textContent="";
+  }
+}
+async function initAuth(){
+  if(!sb) return;
+  const {data}=await sb.auth.getSession();
+  renderAuthBar(data?.session?.user||null);
+  sb.auth.onAuthStateChange((_e,session)=>renderAuthBar(session?.user||null));
+}
+$("auth-btn").onclick=()=>{authMode="login";openAuth();};
+$("logout-btn").onclick=async()=>{ if(sb) await sb.auth.signOut(); };
+$("auth-ov").onclick=e=>{ if(e.target.id==="auth-ov") closeAuth(); };
+
+/* ===== Lịch sử mua hàng ===== */
+const escH = s => String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+async function openHistory(){
+  if(!sb) return;
+  const {data,error}=await sb.from("orders").select("code,pname,pkg,amount,status,key_value,created").order("created",{ascending:false}).limit(50);
+  const rows = error ? [] : (data||[]);
+  const label = s => s==="done" ? "Đã giao key" : "Chờ thanh toán";
+  $("hist-modal").innerHTML=`<button class="x" id="hx">×</button>
+    <h2 style="margin:0 0 10px">Lịch sử mua hàng</h2>
+    ${rows.length ? rows.map(o=>`<div style="border-bottom:1px solid var(--line);padding:12px 0">
+      <div><b>${escH(o.pname)}</b> · ${escH(o.pkg)}</div>
+      <div class="hint">${fmt(o.amount)} · ${new Date(o.created).toLocaleString("vi-VN")} · <span style="color:${o.status==="done"?"var(--ok)":"var(--mute)"}">${label(o.status)}</span></div>
+      <div class="code" style="font-size:14px;margin-top:4px;word-break:break-all">${o.status==="done"?escH(o.key_value):"Mã đơn: "+escH(o.code)}</div>
+    </div>`).join("") : '<p class="hint">Bạn chưa có đơn hàng nào.</p>'}`;
+  $("hx").onclick=()=>$("hist-ov").classList.remove("open");
+  $("hist-ov").classList.add("open");
+}
+$("hist-btn").onclick=openHistory;
+$("hist-ov").onclick=e=>{ if(e.target.id==="hist-ov") $("hist-ov").classList.remove("open"); };
+
 /* ===== Khởi động ===== */
 renderPresets(); markPreset();
 $("nap-btn").onclick=napQR;
 $("nap-amt").oninput=markPreset;
+initAuth();
 (async()=>{ await loadProducts(); renderGrid(); await loadExtras(); })();
 </script>
 </body>
