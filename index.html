@@ -75,6 +75,8 @@ footer{text-align:center;color:var(--mute);font-size:13px;padding:30px 0 0;borde
     <a data-s="home" class="on">Trang chủ</a>
     <a data-s="prod">Sản phẩm</a>
     <a data-s="nap">Nạp ví</a>
+    <a data-s="guides">Hướng dẫn</a>
+    <a data-s="downloads">Link tải phần mềm</a>
     <a data-s="support">Hỗ trợ</a>
   </nav>
 </header>
@@ -89,9 +91,15 @@ footer{text-align:center;color:var(--mute);font-size:13px;padding:30px 0 0;borde
     <h2 class="sec" id="prod">Sản phẩm nổi bật</h2>
     <p class="sub">Chọn gói phù hợp rồi quét mã VietQR để thanh toán.</p>
     <div class="grid" id="grid"></div>
+  </section>
+
+  <section id="sec-guides" hidden>
     <h2 class="sec" id="guides">Hướng dẫn sử dụng</h2>
     <p class="sub">Video và các bước cài đặt.</p>
     <div class="grid" id="guide-grid"></div>
+  </section>
+
+  <section id="sec-downloads" hidden>
     <h2 class="sec" id="downloads">Link tải phần mềm</h2>
     <p class="sub">Phần mềm và link tải chính thức.</p>
     <div class="grid" id="download-grid"></div>
@@ -189,8 +197,8 @@ function markPreset(){const v=String(Number($("nap-amt").value));$("presets").qu
 
 /* ===== Điều hướng ===== */
 function show(s){
-  const map={home:"sec-home",prod:"sec-home",nap:"sec-nap",support:"sec-support"};
-  ["sec-home","sec-nap","sec-support"].forEach(id=>$(id).hidden=id!==map[s]);
+  const map={home:"sec-home",prod:"sec-home",guides:"sec-guides",downloads:"sec-downloads",nap:"sec-nap",support:"sec-support"};
+  ["sec-home","sec-guides","sec-downloads","sec-nap","sec-support"].forEach(id=>$(id).hidden=id!==map[s]);
   document.querySelectorAll("nav a").forEach(a=>a.classList.toggle("on",a.dataset.s===s));
   if(s==="prod") $("prod").scrollIntoView({behavior:"smooth"}); else window.scrollTo({top:0});
 }
@@ -253,10 +261,25 @@ function watchOrder(code){
       const o=Array.isArray(data)?data[0]:data;
       if(o&&o.status==="done"&&o.key_value){
         clearInterval(stopWatch); stopWatch=null;
-        $("status").innerHTML=`<b style="color:var(--ok)">✅ Thanh toán thành công! Key của bạn:</b><div class="keybox">${o.key_value}</div>`;
+        $("status").innerHTML=`<b style="color:var(--ok)">✅ Thanh toán thành công! Key của bạn:</b><div class="keybox" style="display:flex;justify-content:space-between;align-items:center;gap:10px"><span id="key-txt" style="word-break:break-all">${o.key_value}</span><button type="button" id="copy-btn" onclick="copyKey()" style="flex-shrink:0;background:linear-gradient(135deg,#2563eb,#7c3aed);color:#fff;border:0;padding:8px 14px;border-radius:10px;font-weight:700;cursor:pointer">Copy</button></div>`;
       }
     }catch(e){}
   },5000);
+}
+
+/* ===== Copy key ===== */
+function copyKey(){
+  const txt=document.getElementById("key-txt").textContent.trim();
+  const btn=document.getElementById("copy-btn");
+  const done=()=>{btn.textContent="Đã copy ✓";setTimeout(()=>btn.textContent="Copy",2000);};
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(txt).then(done).catch(()=>fallbackCopy(txt,done));
+  } else fallbackCopy(txt,done);
+}
+function fallbackCopy(txt,done){
+  const ta=document.createElement("textarea"); ta.value=txt; document.body.appendChild(ta);
+  ta.select(); try{document.execCommand("copy");done();}catch(e){alert("Không copy được, hãy chọn và copy thủ công.");}
+  ta.remove();
 }
 
 /* ===== Hướng dẫn & link tải (từ trang quản trị) ===== */
