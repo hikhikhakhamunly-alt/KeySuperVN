@@ -9,7 +9,8 @@
 <style>
 :root{--bg:#050914;--card:#0b1430;--line:#1c2b50;--txt:#eaf1ff;--mute:#8ea0c4;--acc:#3ea6ff;--ok:#2ee59d;--bad:#ff5c7a}
 *{box-sizing:border-box}
-body{margin:0;min-height:100vh;color:var(--txt);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:radial-gradient(900px 500px at 10% -10%,#1d4ed855,transparent 60%),radial-gradient(800px 500px at 100% 10%,#7c3aed44,transparent 60%),var(--bg);background-attachment:fixed}
+body{margin:0;min-height:100vh;color:var(--txt);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  background:radial-gradient(900px 500px at 10% -10%,#1d4ed855,transparent 60%),radial-gradient(800px 500px at 100% 10%,#7c3aed44,transparent 60%),var(--bg);background-attachment:fixed}
 header{position:sticky;top:0;z-index:5;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:14px 22px;background:rgba(5,9,20,.75);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
 .logo{font-weight:900;font-size:22px;letter-spacing:1px}
 .rainbow{background:linear-gradient(90deg,#3ea6ff,#a855f7,#22d3ee,#f472b6,#3ea6ff);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shift 6s linear infinite}
@@ -50,7 +51,6 @@ h2.sec{margin:34px 0 4px;font-size:24px}
 .chips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 16px}
 .chip{background:#0a1226;border:1px solid var(--line);color:var(--txt);padding:10px 14px;border-radius:12px;cursor:pointer;font-size:14px}
 .chip.on{border-color:var(--acc);box-shadow:0 0 0 1px var(--acc) inset;color:#fff;background:#13245a}
-.chip:disabled{opacity:.4;cursor:not-allowed}
 input{width:100%;background:#0a1226;color:var(--txt);border:1px solid var(--line);border-radius:12px;padding:12px 14px;font:inherit;font-size:15px}
 label{display:block;font-size:13px;color:var(--mute);margin:6px 0}
 .overlay{position:fixed;inset:0;background:rgba(2,4,12,.72);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;padding:16px;z-index:20}
@@ -64,8 +64,6 @@ label{display:block;font-size:13px;color:var(--mute);margin:6px 0}
 .keybox{font-family:ui-monospace,Consolas,monospace;background:#06101f;border:1px dashed var(--ok);color:var(--ok);padding:12px;border-radius:12px;word-break:break-all;margin-top:10px}
 .zalo{display:block;text-align:center;margin-top:12px;background:#0068ff;color:#fff;text-decoration:none;padding:12px;border-radius:12px;font-weight:700}
 .hint{color:var(--mute);font-size:13px}
-.guide-video{display:block;width:100%;max-height:420px;background:#000;aspect-ratio:16/9}
-.guide-desc{white-space:pre-wrap;overflow-wrap:anywhere}
 footer{text-align:center;color:var(--mute);font-size:13px;padding:30px 0 0;border-top:1px solid var(--line);margin-top:50px}
 [hidden]{display:none!important}
 </style>
@@ -77,8 +75,6 @@ footer{text-align:center;color:var(--mute);font-size:13px;padding:30px 0 0;borde
     <a data-s="home" class="on">Trang chủ</a>
     <a data-s="prod">Sản phẩm</a>
     <a data-s="nap">Nạp ví</a>
-    <a data-s="guides">Hướng dẫn</a>
-    <a data-s="downloads">Tải phần mềm</a>
     <a data-s="support">Hỗ trợ</a>
   </nav>
 </header>
@@ -108,18 +104,6 @@ footer{text-align:center;color:var(--mute);font-size:13px;padding:30px 0 0;borde
     </div>
   </section>
 
-  <section id="sec-guides" hidden>
-    <h2 class="sec">Video hướng dẫn</h2>
-    <p class="sub">Xem video và đọc mô tả để sử dụng các chức năng.</p>
-    <div class="grid" id="guides-grid"><div class="panel hint">Đang tải hướng dẫn...</div></div>
-  </section>
-
-  <section id="sec-downloads" hidden>
-    <h2 class="sec">Link tải phần mềm</h2>
-    <p class="sub">Thông tin, mô tả và link tải chính thức do admin cập nhật.</p>
-    <div class="grid" id="downloads-grid"><div class="panel hint">Đang tải danh sách phần mềm...</div></div>
-  </section>
-
   <section id="sec-support" hidden>
     <div class="panel">
       <h2>Liên hệ admin</h2>
@@ -135,27 +119,24 @@ footer{text-align:center;color:var(--mute);font-size:13px;padding:30px 0 0;borde
 
 <script>
 /* ===== CẤU HÌNH ===== */
-const SB_URL = "https://raztcloppwdzqyshlepp.supabase.co";
-const SB_KEY = "sb_publishable_ZBNx15WHWgcQqQB2qvwjpA_nRjrep5W";
-const ACC = "1059886207";
-const BIN = "970436";
+const SB_URL = "https://raztcloppwdzqyshlepp.supabase.co";       // Project URL (Supabase → Settings → API)
+const SB_KEY = "sb_publishable_ZBNx15WHWgcQqQB2qvwjpA_nRjrep5W";  // anon public key
+const ACC = "8940322166";   // STK chính chủ
+const BIN = "970418";       // BIDV
 const PRESETS = [10000,20000,50000,100000,200000,500000];
 
 const DEFAULTS = [
-  {id:"novax-ios", name:"NovaX Proxy – iOS", cat:"PROXY IOS", desc:"Proxy ipa · Hỗ trợ iOS Antiband", style:"novax", stock:0, img:"", pkg_stock:{},
-   pk:[{l:"1 Ngày",p:15000},{l:"1 Tuần",p:70000},{l:"1 Tháng",p:100000},{l:"Vĩnh viễn",p:200000}]},
-  {id:"innova-cheat", name:"INNOVA CHEAT", cat:"MENU IOS", desc:"Hỗ trợ tải trực tiếp, cần dùng chứng chỉ", style:"innova", stock:0, img:"", pkg_stock:{},
+  {id:"novax-ios", name:"NovaX Proxy – iOS", cat:"PROXY IOS", desc:"Proxy ipa · Hỗ trợ iOS Antiband", style:"novax", stock:0, img:"",
+   pk:[{l:"1 Ngày",p:20000},{l:"1 Tuần",p:70000},{l:"1 Tháng",p:150000}]},
+  {id:"innova-cheat", name:"INNOVA CHEAT", cat:"MENU IOS", desc:"Hỗ trợ tải trực tiếp, cần dùng chứng chỉ", style:"innova", stock:0, img:"",
    pk:[{l:"1 Ngày",p:15000},{l:"1 Tuần",p:70000},{l:"1 Tháng",p:150000}]}
 ];
 
 const sb = (window.supabase && !SB_URL.startsWith("PASTE")) ? window.supabase.createClient(SB_URL, SB_KEY) : null;
 let products=[], cur=null, pkgIdx=0, stopWatch=null;
-let guides=[];
-let downloadItems=[];
 const $ = id => document.getElementById(id);
 const fmt = n => Number(n).toLocaleString("vi-VN")+"đ";
 const rnd = n => Array.from({length:n},()=>"ABCDEFGHJKLMNPQRSTUVWXYZ23456789"[Math.random()*30|0]).join("");
-const pkgCount = (p, label) => ((p.pkg_stock||{})[label]||0);
 
 /* ===== VietQR (chuẩn EMVCo) ===== */
 function tlv(id,v){return id+String(v.length).padStart(2,"0")+v}
@@ -174,7 +155,7 @@ async function loadProducts(){
   products = (!error && data && data.length) ? data.map(p=>({...p,desc:p.descr})) : DEFAULTS;
 }
 
-/* ===== Render sản phẩm ===== */
+/* ===== Render ===== */
 function renderGrid(){
   $("grid").innerHTML = products.map(p=>{
     const st=Number(p.stock||0);
@@ -202,44 +183,12 @@ function markPreset(){const v=String(Number($("nap-amt").value));$("presets").qu
 
 /* ===== Điều hướng ===== */
 function show(s){
-  const map={home:"sec-home",prod:"sec-home",nap:"sec-nap",guides:"sec-guides",downloads:"sec-downloads",support:"sec-support"};
-  ["sec-home","sec-nap","sec-guides","sec-downloads","sec-support"].forEach(id=>$(id).hidden=id!==map[s]);
+  const map={home:"sec-home",prod:"sec-home",nap:"sec-nap",support:"sec-support"};
+  ["sec-home","sec-nap","sec-support"].forEach(id=>$(id).hidden=id!==map[s]);
   document.querySelectorAll("nav a").forEach(a=>a.classList.toggle("on",a.dataset.s===s));
   if(s==="prod") $("prod").scrollIntoView({behavior:"smooth"}); else window.scrollTo({top:0});
-  if(s==="guides") loadGuides();
-  if(s==="downloads") loadSoftwareDownloads();
 }
 document.querySelectorAll("nav a").forEach(a=>a.onclick=()=>show(a.dataset.s));
-
-/* ===== Video hướng dẫn công khai ===== */
-function escHtml(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
-function safeVideoUrl(v){try{const u=new URL(v);return ["https:","http:"].includes(u.protocol)?u.href:"";}catch{return "";}}
-async function loadGuides(){
-  const host=$("guides-grid");
-  if(!sb){host.innerHTML='<div class="panel hint">Chưa kết nối được dữ liệu hướng dẫn.</div>';return;}
-  const {data,error}=await sb.from("guide_videos").select("id,title,description,video_url,created_at").eq("is_published",true).order("created_at",{ascending:false});
-  if(error){host.innerHTML='<div class="panel hint">Không tải được hướng dẫn. Vui lòng thử lại sau.</div>';return;}
-  guides=data||[];
-  host.innerHTML=guides.map(g=>{
-    const url=safeVideoUrl(g.video_url);
-    return `<article class="card"><div>${url?`<video class="guide-video" controls preload="metadata" playsinline src="${escHtml(url)}">Trình duyệt không hỗ trợ video.</video>`:'<div class="thumb">VIDEO</div>'}</div><div class="cbody"><h3>${escHtml(g.title)}</h3><p class="guide-desc">${escHtml(g.description||"")}</p></div></article>`;
-  }).join("")||'<div class="panel hint">Chưa có video hướng dẫn. Admin sẽ cập nhật tại trang quản trị.</div>';
-}
-
-/* ===== Danh sách link tải phần mềm công khai ===== */
-async function loadSoftwareDownloads(){
-  const host=$("downloads-grid");
-  if(!sb){host.innerHTML='<div class="panel hint">Chưa kết nối được dữ liệu phần mềm.</div>';return;}
-  const {data,error}=await sb.from("software_downloads").select("id,title,description,download_url,image_url,created_at").eq("is_published",true).order("created_at",{ascending:false});
-  if(error){host.innerHTML='<div class="panel hint">Không tải được danh sách phần mềm. Vui lòng kiểm tra bảng software_downloads trong Supabase.</div>';return;}
-  downloadItems=data||[];
-  host.innerHTML=downloadItems.map(d=>{
-    const url=safePublicUrl(d.download_url), image=safePublicUrl(d.image_url);
-    const visual=image?`<div class="thumb"><img src="${escHtml(image)}" alt="${escHtml(d.title)}" loading="lazy"></div>`:`<div class="thumb t-generic">DOWNLOAD</div>`;
-    return `<article class="card">${visual}<div class="cbody"><h3>${escHtml(d.title)}</h3><p class="guide-desc">${escHtml(d.description||"")}</p>${url?`<a class="btn" href="${escHtml(url)}" target="_blank" rel="noopener noreferrer" style="text-decoration:none">Tải phần mềm</a>`:'<span class="hint">Link tải hiện không hợp lệ.</span>'}</div></article>`;
-  }).join("")||'<div class="panel hint">Chưa có phần mềm được xuất bản.</div>';
-}
-function safePublicUrl(v){try{const u=new URL(String(v||""));return ["https:","http:"].includes(u.protocol)?u.href:"";}catch{return "";}}
 
 /* ===== Nạp ví ===== */
 function napQR(){
@@ -256,21 +205,16 @@ function napQR(){
 /* ===== Mua key ===== */
 function openBuy(id){
   cur=products.find(p=>p.id===id); if(!cur) return;
-  pkgIdx=Math.max(0,cur.pk.findIndex(x=>pkgCount(cur,x.l)>0));
-  drawBuy(); $("ov").classList.add("open");
+  pkgIdx=Math.max(0,cur.pk.findIndex(x=>((cur.pkg_stock||{})[x.l]||0)>0)); drawBuy(); $("ov").classList.add("open");
 }
 function drawBuy(){
   const pk=cur.pk[pkgIdx];
-  const chips = cur.pk.map((x,i)=>{
-    const n=pkgCount(cur,x.l);
-    return `<button class="chip ${i===pkgIdx?"on":""}" data-i="${i}" ${n>0?"":"disabled"}>${x.l} · ${fmt(x.p)} · ${n>0?"còn "+n+" key":"hết"}</button>`;
-  }).join("");
   $("modal").innerHTML=`<button class="x" id="xc">×</button>
     <h2 style="margin:0 0 6px">${cur.name}</h2>
     <p class="hint" style="margin:0 0 6px">${cur.desc||""}</p>
     <label>Chọn gói</label>
-    <div class="chips">${chips}</div>
-    <button class="btn" id="mk" ${pkgCount(cur,pk.l)>0?"":"disabled"}>Tạo mã QR thanh toán ${fmt(pk.p)}</button>
+    <div class="chips">${cur.pk.map((x,i)=>{const n=(cur.pkg_stock||{})[x.l]||0;return `<button class="chip ${i===pkgIdx?"on":""}" data-i="${i}" ${n>0?"":"disabled"} style="${n>0?"":"opacity:.4"}">${x.l} · ${fmt(x.p)} · ${n>0?"còn "+n+" key":"hết"}</button>`}).join("")}</div>
+    <button class="btn" id="mk">Tạo mã QR thanh toán ${fmt(pk.p)}</button>
     <div id="pay"></div>`;
   $("xc").onclick=closeModal;
   document.querySelectorAll("#modal [data-i]").forEach(b=>b.onclick=()=>{pkgIdx=Number(b.dataset.i);drawBuy()});
@@ -281,7 +225,7 @@ $("ov").onclick=e=>{ if(e.target.id==="ov") closeModal(); };
 
 async function createOrder(){
   const pk=cur.pk[pkgIdx], code="KEY"+rnd(6);
-  if(pkgCount(cur,pk.l)<=0) return;
+  if(!((cur.pkg_stock||{})[pk.l]>0)) return;
   $("pay").innerHTML=`<p class="hint">Đang tạo đơn...</p>`;
   if(sb){
     const {error}=await sb.from("orders").insert({code,product:cur.id,pname:cur.name,pkg:pk.l,amount:pk.p,status:"pending"});
