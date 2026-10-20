@@ -370,13 +370,15 @@ async function openHistory(){
   const {data,error}=await sb.from("orders").select("code,pname,pkg,amount,status,key_value,created").order("created",{ascending:false}).limit(50);
   const rows = error ? [] : (data||[]);
   const label = s => s==="done" ? "Đã giao key" : "Chờ thanh toán";
+  const errBox = error ? `<p class="hint" style="color:var(--bad)">Lỗi tải lịch sử: ${escH(error.message)}</p>` : "";
   $("hist-modal").innerHTML=`<button class="x" id="hx">×</button>
     <h2 style="margin:0 0 10px">Lịch sử mua hàng</h2>
+    ${errBox}
     ${rows.length ? rows.map(o=>`<div style="border-bottom:1px solid var(--line);padding:12px 0">
       <div><b>${escH(o.pname)}</b> · ${escH(o.pkg)}</div>
       <div class="hint">${fmt(o.amount)} · ${new Date(o.created).toLocaleString("vi-VN")} · <span style="color:${o.status==="done"?"var(--ok)":"var(--mute)"}">${label(o.status)}</span></div>
       <div class="code" style="font-size:14px;margin-top:4px;word-break:break-all">${o.status==="done"?escH(o.key_value):"Mã đơn: "+escH(o.code)}</div>
-    </div>`).join("") : '<p class="hint">Bạn chưa có đơn hàng nào.</p>'}`;
+    </div>`).join("") : (error ? "" : '<p class="hint">Bạn chưa có đơn hàng nào.</p>')}`;
   $("hx").onclick=()=>$("hist-ov").classList.remove("open");
   $("hist-ov").classList.add("open");
 }
