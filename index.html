@@ -89,6 +89,12 @@ footer{text-align:center;color:var(--mute);font-size:13px;padding:30px 0 0;borde
     <h2 class="sec" id="prod">Sản phẩm nổi bật</h2>
     <p class="sub">Chọn gói phù hợp rồi quét mã VietQR để thanh toán.</p>
     <div class="grid" id="grid"></div>
+    <h2 class="sec" id="guides">Hướng dẫn sử dụng</h2>
+    <p class="sub">Video và các bước cài đặt.</p>
+    <div class="grid" id="guide-grid"></div>
+    <h2 class="sec" id="downloads">Link tải phần mềm</h2>
+    <p class="sub">Phần mềm và link tải chính thức.</p>
+    <div class="grid" id="download-grid"></div>
   </section>
 
   <section id="sec-nap" hidden>
@@ -119,10 +125,10 @@ footer{text-align:center;color:var(--mute);font-size:13px;padding:30px 0 0;borde
 
 <script>
 /* ===== CẤU HÌNH ===== */
-const SB_URL = "https://raztcloppwdzqyshlepp.supabase.co";       // Project URL (Supabase → Settings → API)
-const SB_KEY = "sb_publishable_ZBNx15WHWgcQqQB2qvwjpA_nRjrep5W";  // anon public key
-const ACC = "8940322166";   // STK chính chủ
-const BIN = "970418";       // BIDV
+const SB_URL = "https://raztcloppwdzqyshlepp.supabase.co";
+const SB_KEY = "sb_publishable_ZBNx15WHWgcQqQB2qvwjpA_nRjrep5W";
+const ACC = "8940322166";
+const BIN = "970418";
 const PRESETS = [10000,20000,50000,100000,200000,500000];
 
 const DEFAULTS = [
@@ -253,11 +259,26 @@ function watchOrder(code){
   },5000);
 }
 
+/* ===== Hướng dẫn & link tải (từ trang quản trị) ===== */
+async function loadExtras(){
+  if(!sb) return;
+  const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  const [g,d]=await Promise.all([
+    sb.from("guide_videos").select("*").eq("is_published",true).order("created_at",{ascending:false}),
+    sb.from("software_downloads").select("*").eq("is_published",true).order("created_at",{ascending:false})
+  ]);
+  $("guide-grid").innerHTML=(g.data||[]).map(x=>`<div class="card"><div class="cbody"><h3>${esc(x.title)}</h3><p>${esc(x.description)}</p>${x.video_url?`<video src="${esc(x.video_url)}" controls playsinline preload="metadata" style="width:100%;border-radius:12px;background:#000"></video>`:""}</div></div>`).join("")||'<p class="hint">Chưa có hướng dẫn.</p>';
+  $("download-grid").innerHTML=(d.data||[]).map(x=>{
+    const safe=/^https?:\/\//i.test(x.download_url)?x.download_url:"#";
+    return `<div class="card">${x.image_url?`<div class="thumb"><img src="${esc(x.image_url)}" alt=""></div>`:""}<div class="cbody"><h3>${esc(x.title)}</h3><p>${esc(x.description)}</p><a class="btn" href="${esc(safe)}" target="_blank" rel="noopener noreferrer" style="display:block;text-align:center;text-decoration:none">Tải phần mềm</a></div></div>`;
+  }).join("")||'<p class="hint">Chưa có link tải.</p>';
+}
+
 /* ===== Khởi động ===== */
 renderPresets(); markPreset();
 $("nap-btn").onclick=napQR;
 $("nap-amt").oninput=markPreset;
-(async()=>{ await loadProducts(); renderGrid(); })();
+(async()=>{ await loadProducts(); renderGrid(); await loadExtras(); })();
 </script>
 </body>
 </html>
