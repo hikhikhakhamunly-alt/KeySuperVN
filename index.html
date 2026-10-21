@@ -97,6 +97,9 @@ footer{text-align:center;color:var(--mute);font-size:13px;padding:30px 0 0;borde
     <h2 class="sec" id="prod">Sản phẩm nổi bật</h2>
     <p class="sub">Chọn gói phù hợp rồi quét mã VietQR để thanh toán.</p>
     <div class="grid" id="grid"></div>
+    <h2 class="sec" id="best">Sản phẩm bán chạy</h2>
+    <p class="sub">Top sản phẩm được mua nhiều nhất.</p>
+    <div class="grid" id="best-grid"></div>
   </section>
 
   <section id="sec-guides" hidden>
@@ -202,6 +205,29 @@ function renderPresets(){
   $("presets").querySelectorAll(".chip").forEach(c=>c.onclick=()=>{$("nap-amt").value=c.dataset.v;markPreset()});
 }
 function markPreset(){const v=String(Number($("nap-amt").value));$("presets").querySelectorAll(".chip").forEach(c=>c.classList.toggle("on",c.dataset.v===v))}
+
+/* ===== Sản phẩm bán chạy ===== */
+let bestRanks={};
+async function loadBestRanks(){
+  if(!sb) return;
+  const {data}=await sb.from("products").select("id,best_rank").not("best_rank","is",null).order("best_rank",{ascending:true}).limit(10);
+  bestRanks={}; (data||[]).forEach(r=>bestRanks[r.id]=r.best_rank);
+}
+function renderBest(){
+  const list=products.filter(p=>bestRanks[p.id]).sort((a,b)=>bestRanks[a.id]-bestRanks[b.id]).slice(0,10);
+  $("best-grid").innerHTML = list.length ? list.map(p=>{
+    const st=Number(p.stock||0);
+    const from=p.pk&&p.pk.length?fmt(Math.min(...p.pk.map(x=>x.p))):"";
+    return `<div class="card"><div class="cbody">
+      <span class="badge">#${bestRanks[p.id]}</span>
+      <h3>${p.name}</h3>
+      <p>${p.desc||""}</p>
+      <div class="row"><span class="price">Từ ${from}</span><span class="stock ${st>0?"in":"out"}">${st>0?"Còn hàng":"Hết hàng"}</span></div>
+      <button class="btn" data-buy="${p.id}" ${st>0?"":"disabled"}>Mua key</button>
+    </div></div>`;
+  }).join("") : '<p class="hint">Chưa có sản phẩm bán chạy.</p>';
+  document.querySelectorAll("#best-grid [data-buy]").forEach(b=>b.onclick=()=>openBuy(b.dataset.buy));
+}
 
 /* ===== Điều hướng ===== */
 function show(s){
@@ -390,7 +416,7 @@ renderPresets(); markPreset();
 $("nap-btn").onclick=napQR;
 $("nap-amt").oninput=markPreset;
 initAuth();
-(async()=>{ await loadProducts(); renderGrid(); await loadExtras(); })();
+(async()=>{ await loadProducts(); await loadBestRanks(); renderGrid(); renderBest(); await loadExtras(); })();
 </script>
 </body>
 </html>
