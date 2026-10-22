@@ -104,12 +104,9 @@ footer{text-align:center;color:var(--mute);font-size:13px;padding:30px 0 0;borde
     <div class="grid" id="best-grid"></div>
 
     <h2 class="sec" id="buyer-rank">🏅 Khách hàng mua nhiều nhất</h2>
-    <p class="sub">Tự động xếp hạng theo số đơn đã hoàn tất; không hiển thị thông tin cá nhân.</p>
+    <p class="sub">Tự động xếp hạng theo số đơn hoàn tất. Tên hiển thị được lấy từ hồ sơ tài khoản hoặc email đã che bớt.</p>
     <div class="grid" id="buyer-rank-grid"></div>
 
-    <h2 class="sec" id="prod">Tất cả sản phẩm</h2>
-    <p class="sub">Chọn gói phù hợp rồi quét mã VietQR để thanh toán.</p>
-    <div class="grid" id="grid"></div>
   </section>
 
   <section id="sec-guides" hidden>
@@ -218,6 +215,14 @@ function markPreset(){const v=String(Number($("nap-amt").value));$("presets").qu
 
 /* ===== Sản phẩm bán chạy ===== */
 let bestRanks={};
+let salesCounts={};
+async function loadSalesCounts(){
+  if(!sb) return;
+  const {data,error}=await sb.rpc("get_product_sales_counts");
+  if(error){ console.warn("Không tải được số lượng đã bán:",error.message); return; }
+  salesCounts={};
+  (data||[]).forEach(r=>salesCounts[String(r.product_id)]=Number(r.sold_count||0));
+}
 async function loadBestRanks(){
   if(!sb) return;
   const {data}=await sb.from("products").select("id,best_rank").not("best_rank","is",null).order("best_rank",{ascending:true}).limit(10);
@@ -241,7 +246,7 @@ function renderBest(){
         <span class="badge">🏆 TOP ${rank}</span>
         <h3>${p.name||""}</h3>
         <p>${p.desc||""}</p>
-        <div class="row"><span class="price">Từ ${from}</span><span class="stock ${st>0?"in":"out"}">${st>0?"Còn hàng":"Hết hàng"}</span></div>
+        <div class="row"><span class="price">Từ ${from}</span><span class="stock ${st>0?"in":"out"}">${st>0?"Còn hàng":"Hết hàng"} · Đã bán ${Number(salesCounts[p.id]||0).toLocaleString("vi-VN")}</span></div>
         <button class="btn" data-buy="${p.id}" ${st>0?"":"disabled"}>Mua key</button>
       </div></div>`;
   }).join("") : '<p class="hint">Chưa có sản phẩm bán chạy. Hãy chọn thứ hạng trong trang quản trị Top 10.</p>';
@@ -275,7 +280,7 @@ function show(s){
   const map={home:"sec-home",prod:"sec-home",guides:"sec-guides",downloads:"sec-downloads",nap:"sec-nap",support:"sec-support"};
   ["sec-home","sec-guides","sec-downloads","sec-nap","sec-support"].forEach(id=>$(id).hidden=id!==map[s]);
   document.querySelectorAll("nav a").forEach(a=>a.classList.toggle("on",a.dataset.s===s));
-  if(s==="prod") $("prod").scrollIntoView({behavior:"smooth"}); else window.scrollTo({top:0});
+  if(s==="prod") $("best").scrollIntoView({behavior:"smooth"}); else window.scrollTo({top:0});
 }
 document.querySelectorAll("nav a").forEach(a=>a.onclick=()=>show(a.dataset.s));
 
@@ -457,7 +462,7 @@ renderPresets(); markPreset();
 $("nap-btn").onclick=napQR;
 $("nap-amt").oninput=markPreset;
 initAuth();
-(async()=>{ await loadProducts(); await loadBestRanks(); renderGrid(); renderBest(); await loadBuyerRanking(); await loadExtras(); })();
+(async()=>{ await loadProducts(); await loadBestRanks(); await loadSalesCounts(); renderBest(); await loadBuyerRanking(); await loadExtras(); })();
 </script>
 </body>
 </html>
