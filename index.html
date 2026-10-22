@@ -205,7 +205,7 @@ function renderGrid(){
         <button class="btn" data-buy="${p.id}" ${st>0?"":"disabled"}>Mua key</button>
       </div></div>`;
   }).join("");
-  document.querySelectorAll("[data-buy]").forEach(b=>b.onclick=()=>openBuy(b.dataset.buy));
+  document.querySelectorAll("[data-buy]").forEach(b=>b.onclick=()=>handleBuyClick(b));
 }
 function renderPresets(){
   $("presets").innerHTML=PRESETS.map(v=>`<button class="chip" data-v="${v}">${fmt(v)}</button>`).join("");
@@ -250,7 +250,7 @@ function renderBest(){
         <button class="btn" data-buy="${p.id}" ${st>0?"":"disabled"}>Mua key</button>
       </div></div>`;
   }).join("") : '<p class="hint">Chưa có sản phẩm bán chạy. Hãy chọn thứ hạng trong trang quản trị Top 10.</p>';
-  document.querySelectorAll("#best-grid [data-buy]").forEach(b=>b.onclick=()=>openBuy(b.dataset.buy));
+  document.querySelectorAll("#best-grid [data-buy]").forEach(b=>b.onclick=()=>handleBuyClick(b));
 }
 
 /* ===== Bảng xếp hạng khách hàng mua nhiều nhất ===== */
@@ -296,8 +296,23 @@ function napQR(){
     <div class="note">Ghi đúng nội dung chuyển khoản để được cộng tiền.</div>`;
 }
 
+/* ===== Bắt buộc đăng ký/đăng nhập trước khi mua ===== */
+let signedInUser=null;
+function getSignedInUser(){ return signedInUser; }
+function handleBuyClick(button){
+  if(!getSignedInUser()){
+    button.textContent="Hãy đăng ký tài khoản nhé";
+    authMode="register";
+    openAuth();
+    drawAuth("Bạn hãy đăng ký tài khoản nhé, rồi đăng nhập để mua key.");
+    return;
+  }
+  openBuy(button.dataset.buy);
+}
+
 /* ===== Mua key ===== */
 function openBuy(id){
+  if(!getSignedInUser()){ authMode="register"; openAuth(); drawAuth("Bạn hãy đăng ký tài khoản nhé, rồi đăng nhập để mua key."); return; }
   cur=products.find(p=>p.id===id); if(!cur) return;
   pkgIdx=Math.max(0,cur.pk.findIndex(x=>((cur.pkg_stock||{})[x.l]||0)>0)); drawBuy(); $("ov").classList.add("open");
 }
@@ -318,11 +333,14 @@ function closeModal(){ $("ov").classList.remove("open"); if(stopWatch){clearInte
 $("ov").onclick=e=>{ if(e.target.id==="ov") closeModal(); };
 
 async function createOrder(){
+  const signedUser=getSignedInUser();
+  if(!signedUser){ closeModal(); authMode="register"; openAuth(); drawAuth("Bạn hãy đăng ký tài khoản nhé, rồi đăng nhập để mua key."); return; }
   const pk=cur.pk[pkgIdx], code="KEY"+rnd(6);
   if(!((cur.pkg_stock||{})[pk.l]>0)) return;
   $("pay").innerHTML=`<p class="hint">Đang tạo đơn...</p>`;
   if(sb){
     const uid=(await sb.auth.getSession()).data.session?.user?.id||null;
+    if(!uid){ closeModal(); authMode="register"; openAuth(); drawAuth("Bạn hãy đăng ký tài khoản nhé, rồi đăng nhập để mua key."); return; }
     const {error}=await sb.from("orders").insert({code,product:cur.id,pname:cur.name,pkg:pk.l,amount:pk.p,status:"pending",user_id:uid});
     if(error){ $("pay").innerHTML=`<p class="hint">Không tạo được đơn, vui lòng thử lại hoặc nhắn admin.</p>`; return; }
   }
@@ -409,15 +427,17 @@ async function submitAuth(){
     if(pass!==$("a-pass2").value) return $("a-msg").textContent="Mật khẩu xác nhận không khớp.";
     const {data,error}=await sb.auth.signUp({email,password:pass,options:{data:{name}}});
     if(error) return $("a-msg").textContent="Lỗi: "+error.message;
-    if(data.session){ closeAuth(); return; }
+    if(data.session){ renderAuthBar(data.session.user); closeAuth(); return; }
     return $("a-msg").textContent="Đã gửi email xác nhận. Vui lòng kiểm tra hộp thư rồi đăng nhập.";
   } else {
     const {error}=await sb.auth.signInWithPassword({email,password:pass});
     if(error) return $("a-msg").textContent="Email hoặc mật khẩu không đúng.";
+    const {data:sessionData}=await sb.auth.getSession(); renderAuthBar(sessionData?.session?.user||null);
     closeAuth();
   }
 }
 function renderAuthBar(user){
+  signedInUser=user||null;
   if(user){
     $("auth-btn").hidden=true; $("logout-btn").hidden=false; $("hist-btn").hidden=false;
     $("auth-name").textContent="Xin chào, "+(user.user_metadata?.name||user.email);
