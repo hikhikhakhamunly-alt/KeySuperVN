@@ -36,6 +36,11 @@ h2.sec{margin:34px 0 4px;font-size:24px}
 .t-generic{background:linear-gradient(135deg,#312e81,#0f172a);color:#d8ccff}
 .cbody{padding:16px 18px 18px}
 .badge{display:inline-block;font-size:11px;letter-spacing:.5px;padding:4px 9px;border-radius:7px;border:1px solid var(--line);color:var(--acc);margin-bottom:10px}
+.buyer-card{background:linear-gradient(180deg,#101d3c,#0a1226);border:1px solid var(--line);border-radius:16px;padding:18px;display:flex;align-items:center;gap:14px;min-width:0}
+.buyer-rank-no{width:48px;height:48px;flex:0 0 48px;border-radius:14px;display:flex;align-items:center;justify-content:center;background:#13245a;border:1px solid #3ea6ff66;font-size:20px;font-weight:900;color:#cfe0ff}
+.buyer-meta{min-width:0;flex:1}.buyer-meta strong{display:block;font-size:16px}.buyer-meta span{display:block;color:var(--mute);font-size:13px;margin-top:5px}
+.buyer-count{font-weight:800;color:var(--ok);white-space:nowrap}
+
 .cbody h3{margin:0 0 6px;font-size:18px}
 .cbody p{margin:0 0 14px;color:var(--mute);font-size:13px;min-height:36px}
 .row{display:flex;justify-content:space-between;align-items:center;gap:8px}
@@ -97,6 +102,11 @@ footer{text-align:center;color:var(--mute);font-size:13px;padding:30px 0 0;borde
     <h2 class="sec" id="best">🏆 Sản phẩm bán chạy · TOP 10</h2>
     <p class="sub">Các sản phẩm được quản trị viên xếp hạng. Mỗi sản phẩm hiển thị ảnh, giá và tình trạng kho.</p>
     <div class="grid" id="best-grid"></div>
+
+    <h2 class="sec" id="buyer-rank">🏅 Khách hàng mua nhiều nhất</h2>
+    <p class="sub">Tự động xếp hạng theo số đơn đã hoàn tất; không hiển thị thông tin cá nhân.</p>
+    <div class="grid" id="buyer-rank-grid"></div>
+
     <h2 class="sec" id="prod">Tất cả sản phẩm</h2>
     <p class="sub">Chọn gói phù hợp rồi quét mã VietQR để thanh toán.</p>
     <div class="grid" id="grid"></div>
@@ -236,6 +246,28 @@ function renderBest(){
       </div></div>`;
   }).join("") : '<p class="hint">Chưa có sản phẩm bán chạy. Hãy chọn thứ hạng trong trang quản trị Top 10.</p>';
   document.querySelectorAll("#best-grid [data-buy]").forEach(b=>b.onclick=()=>openBuy(b.dataset.buy));
+}
+
+/* ===== Bảng xếp hạng khách hàng mua nhiều nhất ===== */
+async function loadBuyerRanking(){
+  const box=$("buyer-rank-grid");
+  if(!sb){box.innerHTML='<p class="hint">Chưa kết nối được dữ liệu.</p>';return;}
+  const {data,error}=await sb.rpc("get_top_buyers");
+  if(error){
+    console.warn("Không tải được bảng xếp hạng khách hàng:",error.message);
+    box.innerHTML='<p class="hint">Chưa bật chức năng xếp hạng khách hàng. Chủ website cần chạy file SQL đi kèm trong Supabase.</p>';
+    return;
+  }
+  const rows=(data||[]).slice(0,5);
+  box.innerHTML=rows.length?rows.map((buyer,i)=>`
+    <div class="buyer-card">
+      <div class="buyer-rank-no">#${Number(buyer.rank||i+1)}</div>
+      <div class="buyer-meta">
+        <strong>${buyer.customer_label||("Khách hàng "+(i+1))}</strong>
+        <span>${Number(buyer.completed_orders||0).toLocaleString("vi-VN")} đơn đã hoàn tất</span>
+      </div>
+      <div class="buyer-count">${fmt(buyer.total_spent||0)}</div>
+    </div>`).join(""):'<p class="hint">Chưa có đơn hàng hoàn tất để xếp hạng.</p>';
 }
 
 /* ===== Điều hướng ===== */
@@ -425,7 +457,7 @@ renderPresets(); markPreset();
 $("nap-btn").onclick=napQR;
 $("nap-amt").oninput=markPreset;
 initAuth();
-(async()=>{ await loadProducts(); await loadBestRanks(); renderGrid(); renderBest(); await loadExtras(); })();
+(async()=>{ await loadProducts(); await loadBestRanks(); renderGrid(); renderBest(); await loadBuyerRanking(); await loadExtras(); })();
 </script>
 </body>
 </html>
