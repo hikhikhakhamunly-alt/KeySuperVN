@@ -79,6 +79,7 @@ footer{text-align:center;color:var(--mute);font-size:13px;padding:30px 0 0;borde
   <nav>
     <a data-s="home" class="on">Trang chủ</a>
     <a data-s="prod">Sản phẩm</a>
+    <a data-s="rent">Thuê acc FF</a>
     <a data-s="nap">Nạp ví</a>
     <a data-s="guides">Hướng dẫn</a>
     <a data-s="downloads">Link tải phần mềm</a>
@@ -102,6 +103,10 @@ footer{text-align:center;color:var(--mute);font-size:13px;padding:30px 0 0;borde
     <h2 class="sec" id="best">🏆 Sản phẩm bán chạy · TOP 10</h2>
     <p class="sub">Các sản phẩm được quản trị viên xếp hạng. Mỗi sản phẩm hiển thị ảnh, giá và tình trạng kho.</p>
     <div class="grid" id="best-grid"></div>
+
+    <h2 class="sec" id="rent-title">🎮 Thuê acc FF</h2>
+    <p class="sub">Chọn tài khoản thuê. Giá, mô tả và ảnh được quản lý trong trang admin ở mục Sản phẩm.</p>
+    <div class="grid" id="rent-grid"></div>
 
     <h2 class="sec" id="buyer-rank">🏅 Khách hàng mua nhiều nhất</h2>
     <p class="sub">Tự động xếp hạng theo số đơn hoàn tất. Tên hiển thị được lấy từ hồ sơ tài khoản hoặc email đã che bớt.</p>
@@ -253,6 +258,27 @@ function renderBest(){
   document.querySelectorAll("#best-grid [data-buy]").forEach(b=>b.onclick=()=>handleBuyClick(b));
 }
 
+/* ===== Thuê acc FF: dùng sản phẩm có danh mục "Thuê acc FF" ===== */
+function isRentAccount(p){
+  const cat=String(p.cat||"").toLowerCase().normalize("NFD").replace(/[\\u0300-\\u036f]/g,"");
+  return cat.includes("thue acc ff") || cat.includes("thue acc free fire") || cat.includes("cho thue acc ff");
+}
+function renderRentAccounts(){
+  const list=products.filter(isRentAccount);
+  const box=$("rent-grid");
+  if(!list.length){
+    box.innerHTML='<p class="hint">Chưa có tài khoản cho thuê. Admin hãy vào mục Sản phẩm, thêm sản phẩm và đặt Danh mục là “Thuê acc FF”, nhập giá, mô tả và tải ảnh lên.</p>';
+    return;
+  }
+  box.innerHTML=list.map(p=>{
+    const st=Number(p.stock||0);
+    const from=p.pk&&p.pk.length?fmt(Math.min(...p.pk.map(x=>Number(x.p)||0))):"Liên hệ";
+    const thumb=p.img?`<img src="${p.img}" alt="${p.name||"Ảnh tài khoản"}" loading="lazy" onerror="this.style.display='none'">`:`<div class="t-${p.style||"generic"}" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center">${(p.name||"ACC FF").split(" ")[0].toUpperCase()}</div>`;
+    return `<div class="card"><div class="thumb">${thumb}</div><div class="cbody"><span class="badge">${p.cat||"Thuê acc FF"}</span><h3>${p.name||""}</h3><p>${p.desc||""}</p><div class="row"><span class="price">Giá thuê: ${from}</span><span class="stock ${st>0?"in":"out"}">${st>0?"Còn hàng":"Hết hàng"}</span></div><button class="btn" data-buy="${p.id}" ${st>0?"":"disabled"}>Thuê tài khoản</button></div></div>`;
+  }).join("");
+  box.querySelectorAll("[data-buy]").forEach(b=>b.onclick=()=>handleBuyClick(b));
+}
+
 /* ===== Bảng xếp hạng khách hàng mua nhiều nhất ===== */
 async function loadBuyerRanking(){
   const box=$("buyer-rank-grid");
@@ -277,10 +303,10 @@ async function loadBuyerRanking(){
 
 /* ===== Điều hướng ===== */
 function show(s){
-  const map={home:"sec-home",prod:"sec-home",guides:"sec-guides",downloads:"sec-downloads",nap:"sec-nap",support:"sec-support"};
+  const map={home:"sec-home",prod:"sec-home",rent:"sec-home",guides:"sec-guides",downloads:"sec-downloads",nap:"sec-nap",support:"sec-support"};
   ["sec-home","sec-guides","sec-downloads","sec-nap","sec-support"].forEach(id=>$(id).hidden=id!==map[s]);
   document.querySelectorAll("nav a").forEach(a=>a.classList.toggle("on",a.dataset.s===s));
-  if(s==="prod") $("best").scrollIntoView({behavior:"smooth"}); else window.scrollTo({top:0});
+  if(s==="prod") $("best").scrollIntoView({behavior:"smooth"}); else if(s==="rent") $("rent-title").scrollIntoView({behavior:"smooth"}); else window.scrollTo({top:0});
 }
 document.querySelectorAll("nav a").forEach(a=>a.onclick=()=>show(a.dataset.s));
 
@@ -482,7 +508,7 @@ renderPresets(); markPreset();
 $("nap-btn").onclick=napQR;
 $("nap-amt").oninput=markPreset;
 initAuth();
-(async()=>{ await loadProducts(); await loadBestRanks(); await loadSalesCounts(); renderBest(); await loadBuyerRanking(); await loadExtras(); })();
+(async()=>{ await loadProducts(); await loadBestRanks(); await loadSalesCounts(); renderBest(); renderRentAccounts(); await loadBuyerRanking(); await loadExtras(); })();
 </script>
 </body>
 </html>
