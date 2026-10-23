@@ -108,11 +108,12 @@ footer{text-align:center;color:var(--mute);font-size:13px;padding:30px 0 0;borde
     <p class="sub">Tự động xếp hạng theo số đơn hoàn tất. Tên hiển thị được lấy từ hồ sơ tài khoản hoặc email đã che bớt.</p>
     <div class="grid" id="buyer-rank-grid"></div>
 
-    <div id="rent-section" style="padding-top:28px">
-      <h2 class="sec" id="rent-title">🎮 Thuê acc FF</h2>
-      <p class="sub">Danh mục thuê tài khoản Free Fire riêng, không trộn với sản phẩm key.</p>
-      <div class="grid" id="rent-grid"></div>
-    </div>
+  </section>
+
+  <section id="sec-rent" hidden>
+    <h2 class="sec" id="rent-title">🎮 Thuê acc FF</h2>
+    <p class="sub">Danh mục thuê tài khoản Free Fire riêng, không trộn với sản phẩm key.</p>
+    <div class="grid" id="rent-grid"></div>
   </section>
 
   <section id="sec-guides" hidden>
@@ -171,7 +172,7 @@ const DEFAULTS = [
 ];
 
 const sb = (window.supabase && !SB_URL.startsWith("PASTE")) ? window.supabase.createClient(SB_URL, SB_KEY) : null;
-let products=[], cur=null, pkgIdx=0, stopWatch=null;
+let products=[], rentalProducts=[], cur=null, pkgIdx=0, stopWatch=null;
 const $ = id => document.getElementById(id);
 const fmt = n => Number(n).toLocaleString("vi-VN")+"đ";
 const rnd = n => Array.from({length:n},()=>"ABCDEFGHJKLMNPQRSTUVWXYZ23456789"[Math.random()*30|0]).join("");
@@ -187,10 +188,19 @@ function vietqr(amount,info){
 function qrSvg(text){const q=qrcode(0,"M");q.addData(text);q.make();return q.createSvgTag({cellSize:5,margin:0})}
 
 /* ===== Dữ liệu (Supabase) ===== */
+function isRentalProduct(p){
+  const cat=String(p.cat||p.category||"").toLowerCase();
+  const name=String(p.name||p.title||"").toLowerCase();
+  return cat.includes("thuê acc ff") || cat.includes("thue acc ff") || cat.includes("free fire thuê") || cat.includes("free fire thue");
+}
 async function loadProducts(){
-  if(!sb){ products=DEFAULTS; return; }
-  const {data,error}=await sb.rpc("get_products");
-  products = (!error && data && data.length) ? data.map(p=>({...p,desc:p.descr})) : DEFAULTS;
+  let all=DEFAULTS;
+  if(sb){
+    const {data,error}=await sb.rpc("get_products");
+    if(!error && data && data.length) all=data.map(p=>({...p,desc:p.descr??p.desc}));
+  }
+  rentalProducts=all.filter(isRentalProduct);
+  products=all.filter(p=>!isRentalProduct(p));
 }
 
 /* ===== Render ===== */
@@ -283,11 +293,10 @@ async function loadBuyerRanking(){
 
 /* ===== Điều hướng ===== */
 function show(s){
-  const map={home:"sec-home",prod:"sec-home",rent:"sec-home",guides:"sec-guides",downloads:"sec-downloads",nap:"sec-nap",support:"sec-support"};
-  ["sec-home","sec-guides","sec-downloads","sec-nap","sec-support"].forEach(id=>$(id).hidden=id!==map[s]);
+  const map={home:"sec-home",prod:"sec-home",rent:"sec-rent",guides:"sec-guides",downloads:"sec-downloads",nap:"sec-nap",support:"sec-support"};
+  ["sec-home","sec-rent","sec-guides","sec-downloads","sec-nap","sec-support"].forEach(id=>$(id).hidden=id!==map[s]);
   document.querySelectorAll("nav a").forEach(a=>a.classList.toggle("on",a.dataset.s===s));
   if(s==="prod") $("best").scrollIntoView({behavior:"smooth"});
-  else if(s==="rent") $("rent-section").scrollIntoView({behavior:"smooth"});
   else window.scrollTo({top:0});
 }
 document.querySelectorAll("nav a").forEach(a=>a.onclick=()=>show(a.dataset.s));
@@ -467,18 +476,22 @@ $("hist-ov").onclick=e=>{ if(e.target.id==="hist-ov") $("hist-ov").classList.rem
 
 /* ===== Thuê acc FF (nhúng trực tiếp trong index) ===== */
 async function loadRentals(){
-  const grid=$("rent-grid");
-  if(!grid) return;
-  grid.innerHTML='<p class="hint">Đang tải tài khoản cho thuê...</p>';
-  if(!sb){grid.innerHTML='<p class="hint">Chưa kết nối được Supabase.</p>';return;}
-  const {data,error}=await sb.from("rental_accounts").select("id,title,description,price,image_url,is_available").eq("is_published",true).order("created_at",{ascending:false});
-  if(error){grid.innerHTML='<p class="hint">Chưa tải được danh sách thuê acc. Hãy kiểm tra bảng rental_accounts trong Supabase.</p>';return;}
-  if(!data?.length){grid.innerHTML='<p class="hint">Chưa có acc FF nào được đăng cho thuê.</p>';return;}
-  grid.innerHTML=data.map(a=>`<article class="card"><div class="thumb">${a.image_url?`<img src="${escH(a.image_url)}" alt="${escH(a.title)}">`:'🎮 FREE FIRE'}</div><div class="cbody"><h3>${escH(a.title)}</h3><p>${escH(a.description||'')}</p><div class="price">${fmt(a.price)}</div><p style="margin-top:8px;color:${a.is_available?'var(--ok)':'var(--bad)'}">${a.is_available?'Còn cho thuê':'Tạm hết'}</p><button class="btn" ${!a.is_available?'disabled':''} data-rent-id="${escH(a.id)}" data-rent-title="${escH(a.title)}">Thuê acc</button></div></article>`).join('');
+  const grid=$("rent-grid"); if(!grid) return;
+  if(!rentalProducts.length){
+    grid.innerHTML='<p class="hint">Chưa có acc FF. Admin hãy thêm sản phẩm và đặt Danh mục chính xác là <b>Thuê acc FF</b> trong trang quản trị.</p>';
+    return;
+  }
+  grid.innerHTML=rentalProducts.map(a=>{
+    const pk=Array.isArray(a.pk)?a.pk:[];
+    const price=pk.length?Math.min(...pk.map(x=>Number(x.p)||0)):Number(a.price||0);
+    const stock=Number(a.stock||0);
+    const img=a.img||a.image_url||"";
+    const title=a.name||a.title||"Acc Free Fire";
+    return `<article class="card"><div class="thumb">${img?`<img src="${escH(img)}" alt="${escH(title)}">`:'🎮 FREE FIRE'}</div><div class="cbody"><h3>${escH(title)}</h3><p>${escH(a.desc||a.description||'')}</p><div class="price">${price?`Từ ${fmt(price)}`:'Liên hệ giá'}</div><p style="margin-top:8px;color:${stock>0?'var(--ok)':'var(--bad)'}">${stock>0?'Còn cho thuê':'Liên hệ admin'}</p><button class="btn" data-rent-id="${escH(String(a.id))}" data-rent-title="${escH(title)}">Thuê acc</button></div></article>`;
+  }).join('');
   grid.querySelectorAll('[data-rent-id]').forEach(btn=>btn.onclick=async()=>{
-    const {data:{user}}=await sb.auth.getUser();
-    if(!user){alert('Hãy đăng ký hoặc đăng nhập tài khoản trước khi thuê acc nhé!');authMode='register';openAuth();return;}
-    alert('Bạn đã chọn '+btn.dataset.rentTitle+'. Vui lòng liên hệ admin để xác nhận thời hạn thuê và nhận thông tin tài khoản.');
+    if(sb){const {data:{user}}=await sb.auth.getUser();if(!user){alert('Hãy đăng ký hoặc đăng nhập trước khi thuê acc.');authMode='register';openAuth();return;}}
+    alert('Bạn chọn '+btn.dataset.rentTitle+'. Vui lòng liên hệ admin để xác nhận thời hạn thuê và nhận thông tin tài khoản.');
   });
 }
 
