@@ -104,14 +104,15 @@ footer{text-align:center;color:var(--mute);font-size:13px;padding:30px 0 0;borde
     <p class="sub">Các sản phẩm được quản trị viên xếp hạng. Mỗi sản phẩm hiển thị ảnh, giá và tình trạng kho.</p>
     <div class="grid" id="best-grid"></div>
 
-    <h2 class="sec" id="rent-title">🎮 Thuê acc FF</h2>
-    <p class="sub">Chọn tài khoản thuê. Giá, mô tả và ảnh được quản lý trong trang admin ở mục Sản phẩm.</p>
-    <div class="grid" id="rent-grid"></div>
-
     <h2 class="sec" id="buyer-rank">🏅 Khách hàng mua nhiều nhất</h2>
     <p class="sub">Tự động xếp hạng theo số đơn hoàn tất. Tên hiển thị được lấy từ hồ sơ tài khoản hoặc email đã che bớt.</p>
     <div class="grid" id="buyer-rank-grid"></div>
 
+    <div id="rent-section" style="padding-top:28px">
+      <h2 class="sec" id="rent-title">🎮 Thuê acc FF</h2>
+      <p class="sub">Danh mục thuê tài khoản Free Fire riêng, không trộn với sản phẩm key.</p>
+      <div class="grid" id="rent-grid"></div>
+    </div>
   </section>
 
   <section id="sec-guides" hidden>
@@ -210,7 +211,7 @@ function renderGrid(){
         <button class="btn" data-buy="${p.id}" ${st>0?"":"disabled"}>Mua key</button>
       </div></div>`;
   }).join("");
-  document.querySelectorAll("[data-buy]").forEach(b=>b.onclick=()=>handleBuyClick(b));
+  document.querySelectorAll("[data-buy]").forEach(b=>b.onclick=()=>openBuy(b.dataset.buy));
 }
 function renderPresets(){
   $("presets").innerHTML=PRESETS.map(v=>`<button class="chip" data-v="${v}">${fmt(v)}</button>`).join("");
@@ -255,28 +256,7 @@ function renderBest(){
         <button class="btn" data-buy="${p.id}" ${st>0?"":"disabled"}>Mua key</button>
       </div></div>`;
   }).join("") : '<p class="hint">Chưa có sản phẩm bán chạy. Hãy chọn thứ hạng trong trang quản trị Top 10.</p>';
-  document.querySelectorAll("#best-grid [data-buy]").forEach(b=>b.onclick=()=>handleBuyClick(b));
-}
-
-/* ===== Thuê acc FF: dùng sản phẩm có danh mục "Thuê acc FF" ===== */
-function isRentAccount(p){
-  const cat=String(p.cat||"").toLowerCase().normalize("NFD").replace(/[\\u0300-\\u036f]/g,"");
-  return cat.includes("thue acc ff") || cat.includes("thue acc free fire") || cat.includes("cho thue acc ff");
-}
-function renderRentAccounts(){
-  const list=products.filter(isRentAccount);
-  const box=$("rent-grid");
-  if(!list.length){
-    box.innerHTML='<p class="hint">Chưa có tài khoản cho thuê. Admin hãy vào mục Sản phẩm, thêm sản phẩm và đặt Danh mục là “Thuê acc FF”, nhập giá, mô tả và tải ảnh lên.</p>';
-    return;
-  }
-  box.innerHTML=list.map(p=>{
-    const st=Number(p.stock||0);
-    const from=p.pk&&p.pk.length?fmt(Math.min(...p.pk.map(x=>Number(x.p)||0))):"Liên hệ";
-    const thumb=p.img?`<img src="${p.img}" alt="${p.name||"Ảnh tài khoản"}" loading="lazy" onerror="this.style.display='none'">`:`<div class="t-${p.style||"generic"}" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center">${(p.name||"ACC FF").split(" ")[0].toUpperCase()}</div>`;
-    return `<div class="card"><div class="thumb">${thumb}</div><div class="cbody"><span class="badge">${p.cat||"Thuê acc FF"}</span><h3>${p.name||""}</h3><p>${p.desc||""}</p><div class="row"><span class="price">Giá thuê: ${from}</span><span class="stock ${st>0?"in":"out"}">${st>0?"Còn hàng":"Hết hàng"}</span></div><button class="btn" data-buy="${p.id}" ${st>0?"":"disabled"}>Thuê tài khoản</button></div></div>`;
-  }).join("");
-  box.querySelectorAll("[data-buy]").forEach(b=>b.onclick=()=>handleBuyClick(b));
+  document.querySelectorAll("#best-grid [data-buy]").forEach(b=>b.onclick=()=>openBuy(b.dataset.buy));
 }
 
 /* ===== Bảng xếp hạng khách hàng mua nhiều nhất ===== */
@@ -306,7 +286,9 @@ function show(s){
   const map={home:"sec-home",prod:"sec-home",rent:"sec-home",guides:"sec-guides",downloads:"sec-downloads",nap:"sec-nap",support:"sec-support"};
   ["sec-home","sec-guides","sec-downloads","sec-nap","sec-support"].forEach(id=>$(id).hidden=id!==map[s]);
   document.querySelectorAll("nav a").forEach(a=>a.classList.toggle("on",a.dataset.s===s));
-  if(s==="prod") $("best").scrollIntoView({behavior:"smooth"}); else if(s==="rent") $("rent-title").scrollIntoView({behavior:"smooth"}); else window.scrollTo({top:0});
+  if(s==="prod") $("best").scrollIntoView({behavior:"smooth"});
+  else if(s==="rent") $("rent-section").scrollIntoView({behavior:"smooth"});
+  else window.scrollTo({top:0});
 }
 document.querySelectorAll("nav a").forEach(a=>a.onclick=()=>show(a.dataset.s));
 
@@ -322,23 +304,8 @@ function napQR(){
     <div class="note">Ghi đúng nội dung chuyển khoản để được cộng tiền.</div>`;
 }
 
-/* ===== Bắt buộc đăng ký/đăng nhập trước khi mua ===== */
-let signedInUser=null;
-function getSignedInUser(){ return signedInUser; }
-function handleBuyClick(button){
-  if(!getSignedInUser()){
-    button.textContent="Hãy đăng ký tài khoản nhé";
-    authMode="register";
-    openAuth();
-    drawAuth("Bạn hãy đăng ký tài khoản nhé, rồi đăng nhập để mua key.");
-    return;
-  }
-  openBuy(button.dataset.buy);
-}
-
 /* ===== Mua key ===== */
 function openBuy(id){
-  if(!getSignedInUser()){ authMode="register"; openAuth(); drawAuth("Bạn hãy đăng ký tài khoản nhé, rồi đăng nhập để mua key."); return; }
   cur=products.find(p=>p.id===id); if(!cur) return;
   pkgIdx=Math.max(0,cur.pk.findIndex(x=>((cur.pkg_stock||{})[x.l]||0)>0)); drawBuy(); $("ov").classList.add("open");
 }
@@ -359,14 +326,11 @@ function closeModal(){ $("ov").classList.remove("open"); if(stopWatch){clearInte
 $("ov").onclick=e=>{ if(e.target.id==="ov") closeModal(); };
 
 async function createOrder(){
-  const signedUser=getSignedInUser();
-  if(!signedUser){ closeModal(); authMode="register"; openAuth(); drawAuth("Bạn hãy đăng ký tài khoản nhé, rồi đăng nhập để mua key."); return; }
   const pk=cur.pk[pkgIdx], code="KEY"+rnd(6);
   if(!((cur.pkg_stock||{})[pk.l]>0)) return;
   $("pay").innerHTML=`<p class="hint">Đang tạo đơn...</p>`;
   if(sb){
     const uid=(await sb.auth.getSession()).data.session?.user?.id||null;
-    if(!uid){ closeModal(); authMode="register"; openAuth(); drawAuth("Bạn hãy đăng ký tài khoản nhé, rồi đăng nhập để mua key."); return; }
     const {error}=await sb.from("orders").insert({code,product:cur.id,pname:cur.name,pkg:pk.l,amount:pk.p,status:"pending",user_id:uid});
     if(error){ $("pay").innerHTML=`<p class="hint">Không tạo được đơn, vui lòng thử lại hoặc nhắn admin.</p>`; return; }
   }
@@ -453,17 +417,15 @@ async function submitAuth(){
     if(pass!==$("a-pass2").value) return $("a-msg").textContent="Mật khẩu xác nhận không khớp.";
     const {data,error}=await sb.auth.signUp({email,password:pass,options:{data:{name}}});
     if(error) return $("a-msg").textContent="Lỗi: "+error.message;
-    if(data.session){ renderAuthBar(data.session.user); closeAuth(); return; }
+    if(data.session){ closeAuth(); return; }
     return $("a-msg").textContent="Đã gửi email xác nhận. Vui lòng kiểm tra hộp thư rồi đăng nhập.";
   } else {
     const {error}=await sb.auth.signInWithPassword({email,password:pass});
     if(error) return $("a-msg").textContent="Email hoặc mật khẩu không đúng.";
-    const {data:sessionData}=await sb.auth.getSession(); renderAuthBar(sessionData?.session?.user||null);
     closeAuth();
   }
 }
 function renderAuthBar(user){
-  signedInUser=user||null;
   if(user){
     $("auth-btn").hidden=true; $("logout-btn").hidden=false; $("hist-btn").hidden=false;
     $("auth-name").textContent="Xin chào, "+(user.user_metadata?.name||user.email);
@@ -503,12 +465,29 @@ async function openHistory(){
 $("hist-btn").onclick=openHistory;
 $("hist-ov").onclick=e=>{ if(e.target.id==="hist-ov") $("hist-ov").classList.remove("open"); };
 
+/* ===== Thuê acc FF (nhúng trực tiếp trong index) ===== */
+async function loadRentals(){
+  const grid=$("rent-grid");
+  if(!grid) return;
+  grid.innerHTML='<p class="hint">Đang tải tài khoản cho thuê...</p>';
+  if(!sb){grid.innerHTML='<p class="hint">Chưa kết nối được Supabase.</p>';return;}
+  const {data,error}=await sb.from("rental_accounts").select("id,title,description,price,image_url,is_available").eq("is_published",true).order("created_at",{ascending:false});
+  if(error){grid.innerHTML='<p class="hint">Chưa tải được danh sách thuê acc. Hãy kiểm tra bảng rental_accounts trong Supabase.</p>';return;}
+  if(!data?.length){grid.innerHTML='<p class="hint">Chưa có acc FF nào được đăng cho thuê.</p>';return;}
+  grid.innerHTML=data.map(a=>`<article class="card"><div class="thumb">${a.image_url?`<img src="${escH(a.image_url)}" alt="${escH(a.title)}">`:'🎮 FREE FIRE'}</div><div class="cbody"><h3>${escH(a.title)}</h3><p>${escH(a.description||'')}</p><div class="price">${fmt(a.price)}</div><p style="margin-top:8px;color:${a.is_available?'var(--ok)':'var(--bad)'}">${a.is_available?'Còn cho thuê':'Tạm hết'}</p><button class="btn" ${!a.is_available?'disabled':''} data-rent-id="${escH(a.id)}" data-rent-title="${escH(a.title)}">Thuê acc</button></div></article>`).join('');
+  grid.querySelectorAll('[data-rent-id]').forEach(btn=>btn.onclick=async()=>{
+    const {data:{user}}=await sb.auth.getUser();
+    if(!user){alert('Hãy đăng ký hoặc đăng nhập tài khoản trước khi thuê acc nhé!');authMode='register';openAuth();return;}
+    alert('Bạn đã chọn '+btn.dataset.rentTitle+'. Vui lòng liên hệ admin để xác nhận thời hạn thuê và nhận thông tin tài khoản.');
+  });
+}
+
 /* ===== Khởi động ===== */
 renderPresets(); markPreset();
 $("nap-btn").onclick=napQR;
 $("nap-amt").oninput=markPreset;
 initAuth();
-(async()=>{ await loadProducts(); await loadBestRanks(); await loadSalesCounts(); renderBest(); renderRentAccounts(); await loadBuyerRanking(); await loadExtras(); })();
+(async()=>{ await loadProducts(); await loadBestRanks(); await loadSalesCounts(); renderBest(); await loadBuyerRanking(); await loadExtras(); await loadRentals(); })();
 </script>
 </body>
 </html>
