@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -50,14 +49,14 @@ h2.sec{margin:34px 0 4px;font-size:24px}
 .chips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 16px}
 .chip{background:#0a1226;border:1px solid var(--line);color:var(--txt);padding:10px 14px;border-radius:12px;cursor:pointer;font-size:14px}
 .chip.on{border-color:var(--acc);box-shadow:0 0 0 1px var(--acc) inset;color:#fff;background:#13245a}
+.chip:disabled{opacity:.4;cursor:not-allowed}
 input{width:100%;background:#0a1226;color:var(--txt);border:1px solid var(--line);border-radius:12px;padding:12px 14px;font:inherit;font-size:15px}
 label{display:block;font-size:13px;color:var(--mute);margin:6px 0}
 .overlay{position:fixed;inset:0;background:rgba(2,4,12,.72);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;padding:16px;z-index:20}
 .overlay.open{display:flex}
 .modal{background:#0b1430;border:1px solid var(--line);border-radius:20px;max-width:460px;width:100%;max-height:92vh;overflow:auto;padding:24px;position:relative;box-shadow:0 30px 80px -20px #000}
 .x{position:absolute;right:14px;top:10px;background:none;border:0;color:var(--mute);font-size:26px;cursor:pointer}
-.qr{background:#fff;border-radius:14px;padding:12px;display:inline-block;margin:14px 0;max-width:100%}
-.qr img{display:block;width:230px;max-width:100%;height:auto}
+.qr{background:#fff;border-radius:14px;padding:12px;display:inline-block;margin:14px 0}
 .qr svg{display:block;width:230px;height:230px}
 .code{font-family:ui-monospace,Consolas,monospace;font-size:18px;font-weight:800;color:var(--ok);letter-spacing:1px}
 .note{font-size:12px;color:var(--mute);margin-top:10px;line-height:1.6}
@@ -66,7 +65,9 @@ label{display:block;font-size:13px;color:var(--mute);margin:6px 0}
 .hint{color:var(--mute);font-size:13px}
 .buyer-card{background:linear-gradient(180deg,#101d3c,#0a1226);border:1px solid var(--line);border-radius:16px;padding:18px;display:flex;align-items:center;gap:14px;min-width:0}
 .buyer-rank-no{width:48px;height:48px;flex:0 0 48px;border-radius:14px;display:flex;align-items:center;justify-content:center;background:#13245a;border:1px solid #3ea6ff66;font-size:20px;font-weight:900;color:#cfe0ff}
-.buyer-meta{min-width:0;flex:1}.buyer-meta strong{display:block;font-size:16px}.buyer-meta span{display:block;color:var(--mute);font-size:13px;margin-top:5px}
+.buyer-meta{min-width:0;flex:1}
+.buyer-meta strong{display:block;font-size:16px}
+.buyer-meta span{display:block;color:var(--mute);font-size:13px;margin-top:5px}
 .buyer-count{font-weight:800;color:var(--ok);white-space:nowrap}
 footer{text-align:center;color:var(--mute);font-size:13px;padding:30px 0 0;border-top:1px solid var(--line);margin-top:50px}
 [hidden]{display:none!important}
@@ -74,7 +75,7 @@ footer{text-align:center;color:var(--mute);font-size:13px;padding:30px 0 0;borde
 </head>
 <body>
 <header>
-  <div class="logo rainbow">Key Super VN</div>
+  <div class="logo rainbow">KEY SUPER VN</div>
   <nav>
     <a data-s="home" class="on">Trang chủ</a>
     <a data-s="prod">Sản phẩm</a>
@@ -100,16 +101,16 @@ footer{text-align:center;color:var(--mute);font-size:13px;padding:30px 0 0;borde
       <div class="pills">
         <span class="pill">⚡ Kích hoạt nhanh</span>
         <span class="pill">🛡 Bảo hành trọn gói</span>
-        <span class="pill">💙 Thanh toán ZaloPay</span>
+        <span class="pill">🏦 Chuyển khoản Bản Việt</span>
         <span class="pill">🎧 Hỗ trợ 24/7</span>
       </div>
     </div>
 
-    <h2 class="sec" id="best">🏆 Sản phẩm bán chạy · TOP 10</h2>
+    <h2 class="sec">🏆 Sản phẩm bán chạy · TOP 10</h2>
     <p class="sub">Các sản phẩm được quản trị viên xếp hạng.</p>
     <div class="grid" id="best-grid"></div>
 
-    <h2 class="sec" id="buyer-rank">🏅 Khách hàng mua nhiều nhất</h2>
+    <h2 class="sec">🏅 Khách hàng mua nhiều nhất</h2>
     <p class="sub">Xếp hạng theo số đơn hoàn tất.</p>
     <div class="grid" id="buyer-rank-grid"></div>
 
@@ -138,13 +139,13 @@ footer{text-align:center;color:var(--mute);font-size:13px;padding:30px 0 0;borde
 
   <section id="sec-nap" hidden>
     <div class="panel">
-      <h2>Nạp tiền ví – quét QR ZaloPay</h2>
-      <p class="hint">Chọn số tiền rồi quét mã QR. Chỉ cộng tiền sau khi admin xác nhận.</p>
+      <h2>Nạp tiền ví – chuyển khoản Ngân hàng Bản Việt</h2>
+      <p class="hint">Chọn số tiền rồi quét mã QR. Tiền chỉ được cộng sau khi admin xác nhận.</p>
       <label>Mệnh giá nhanh</label>
       <div class="chips" id="presets"></div>
       <label>Số tiền (VNĐ)</label>
       <input id="nap-amt" type="number" min="10000" max="500000" step="1000" value="50000">
-      <button class="btn" id="nap-btn">Hiện mã QR ZaloPay</button>
+      <div style="margin-top:14px"><button class="btn" id="nap-btn">Tạo mã QR nạp ví</button></div>
       <div id="nap-out"></div>
     </div>
   </section>
@@ -168,9 +169,9 @@ footer{text-align:center;color:var(--mute);font-size:13px;padding:30px 0 0;borde
 /* ===== CẤU HÌNH ===== */
 const SB_URL = "https://raztcloppwdzqyshlepp.supabase.co";
 const SB_KEY = "sb_publishable_ZBNx15WHWgcQqQB2qvwjpA_nRjrep5W";
-
-/* Đặt ảnh QR ZaloPay tên zalopay-qr.png cùng thư mục index.html */
-const ZALOPAY_QR = "./zalopay-qr.png";
+const BANK_NAME = "Ngân hàng Bản Việt";
+const BIN = "970454";                 // Mã BIN Ngân hàng Bản Việt
+const ACC = "99ZP26296M80699292";     // Số tài khoản nhận tiền
 const PRESETS = [10000,20000,50000,100000,200000,500000];
 
 const DEFAULTS = [
@@ -178,74 +179,80 @@ const DEFAULTS = [
   {id:"innova-cheat",name:"INNOVA CHEAT",cat:"MENU IOS",desc:"Hỗ trợ tải trực tiếp, cần dùng chứng chỉ",style:"innova",stock:0,img:"",pk:[{l:"1 Ngày",p:15000},{l:"1 Tuần",p:70000},{l:"1 Tháng",p:150000}]}
 ];
 
-const sb = window.supabase ? window.supabase.createClient(SB_URL,SB_KEY) : null;
-let products=[],rentalProducts=[],cur=null,pkgIdx=0,stopWatch=null;
+const sb = window.supabase ? window.supabase.createClient(SB_URL, SB_KEY) : null;
+let products=[], rentalProducts=[], cur=null, pkgIdx=0, stopWatch=null, authMode="login";
 const $ = id => document.getElementById(id);
 const fmt = n => Number(n||0).toLocaleString("vi-VN")+"đ";
 const rnd = n => Array.from({length:n},()=>"ABCDEFGHJKLMNPQRSTUVWXYZ23456789"[Math.random()*30|0]).join("");
 const escH = s => String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const isRentalProduct = p => {
-  const cat=String(p.cat||p.category||"").toLowerCase();
-  const name=String(p.name||p.title||"").toLowerCase();
+  const cat=String(p.cat||"").toLowerCase();
   return cat.includes("thuê acc ff")||cat.includes("thue acc ff")||cat.includes("free fire thuê")||cat.includes("free fire thue");
 };
 
+/* ===== VietQR (chuẩn EMVCo) – tạo mã thanh toán Bản Việt ===== */
+function tlv(id,v){return id+String(v.length).padStart(2,"0")+v}
+function crc16(s){let c=0xFFFF;for(let i=0;i<s.length;i++){c^=s.charCodeAt(i)<<8;for(let j=0;j<8;j++)c=(c&0x8000)?((c<<1)^0x1021):(c<<1);c&=0xFFFF}return c.toString(16).toUpperCase().padStart(4,"0")}
+function vietqr(amount,info){
+  const m38=tlv("00","A000000727")+tlv("01",tlv("00",BIN)+tlv("01",ACC))+tlv("02","QRIBFTTA");
+  let s=tlv("00","01")+tlv("01","12")+tlv("38",m38)+tlv("52","0000")+tlv("53","704")+tlv("54",String(amount))+tlv("58","VN")+tlv("62",tlv("08",info.slice(0,25)));
+  s+="6304";
+  return s+crc16(s);
+}
+function qrSvg(text){const q=qrcode(0,"M");q.addData(text);q.make();return q.createSvgTag({cellSize:5,margin:0})}
+function payBlock(amount,info,title){
+  return `<div class="qr">${qrSvg(vietqr(amount,info))}</div>
+    <div><b>${escH(title)}</b></div>
+    <div>Ngân hàng: <b>${escH(BANK_NAME)}</b></div>
+    <div>Số tài khoản: <span class="code" style="font-size:15px">${escH(ACC)}</span></div>
+    <div>Số tiền: <b>${fmt(amount)}</b></div>
+    <div style="margin-top:6px">Nội dung chuyển khoản (bắt buộc): <span class="code">${escH(info)}</span></div>
+    <div class="note">Mở app ngân hàng, quét mã QR hoặc nhập đúng số tài khoản, số tiền và nội dung. Không ghi thêm chữ nào khác vào nội dung.</div>`;
+}
+
+/* ===== Dữ liệu (Supabase) ===== */
 async function loadProducts(){
   let all=DEFAULTS;
   if(sb){
     const {data,error}=await sb.rpc("get_products");
-    if(!error&&Array.isArray(data)&&data.length)all=data.map(p=>({...p,desc:p.descr??p.desc}));
+    if(!error&&Array.isArray(data)&&data.length) all=data.map(p=>({...p,desc:p.descr??p.desc}));
   }
   rentalProducts=all.filter(isRentalProduct);
   products=all.filter(p=>!isRentalProduct(p));
 }
-
-function show(s){
-  const map={home:"sec-home",prod:"sec-home",rent:"sec-rent",guides:"sec-guides",downloads:"sec-downloads",nap:"sec-nap",support:"sec-support"};
-  ["sec-home","sec-rent","sec-guides","sec-downloads","sec-nap","sec-support"].forEach(id=>$(id).hidden=id!==map[s]);
-  document.querySelectorAll("nav a").forEach(a=>a.classList.toggle("on",a.dataset.s===s));
-  if(s==="prod")$("product-grid").scrollIntoView({behavior:"smooth"});
-  else window.scrollTo({top:0});
+let bestRanks={};
+async function loadBestRanks(){
+  if(!sb) return;
+  const {data}=await sb.from("products").select("id,best_rank").not("best_rank","is",null).order("best_rank",{ascending:true}).limit(10);
+  bestRanks={}; (data||[]).forEach(r=>bestRanks[r.id]=r.best_rank);
 }
-document.querySelectorAll("nav a").forEach(a=>a.onclick=()=>show(a.dataset.s));
 
+/* ===== Render ===== */
 function productCard(p){
   const st=Number(p.stock||0);
   const from=p.pk?.length?fmt(Math.min(...p.pk.map(x=>Number(x.p)||0))):"Liên hệ";
   const thumb=p.img?`<img src="${escH(p.img)}" alt="${escH(p.name)}">`:`<div class="t-${escH(p.style||"generic")}" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center">${escH((p.name||"KEY").split(" ")[0].toUpperCase())}</div>`;
   return `<div class="card">
-    <div class="thumb">${thumb}</div><div class="cbody">
-    <span class="badge">${escH(p.cat||"SẢN PHẨM")}</span>
-    <h3>${escH(p.name||"")}</h3><p>${escH(p.desc||"")}</p>
-    <div class="row"><span class="price">Từ ${from}</span><span class="stock ${st>0?"in":"out"}">${st>0?"Còn hàng":"Hết hàng"}</span></div>
-    <button class="btn" data-buy="${escH(p.id)}" ${st>0?"":"disabled"}>Mua key</button>
+    <div class="thumb">${thumb}</div>
+    <div class="cbody">
+      <span class="badge">${escH(p.cat||"SẢN PHẨM")}</span>
+      <h3>${escH(p.name||"")}</h3>
+      <p>${escH(p.desc||"")}</p>
+      <div class="row"><span class="price">Từ ${from}</span><span class="stock ${st>0?"in":"out"}">${st>0?"Còn hàng":"Hết hàng"}</span></div>
+      <button class="btn" data-buy="${escH(p.id)}" ${st>0?"":"disabled"}>Mua key</button>
     </div></div>`;
-}
-
-let bestRanks={},salesCounts={};
-async function loadBestRanks(){
-  if(!sb)return;
-  const {data}=await sb.from("products").select("id,best_rank").not("best_rank","is",null).order("best_rank",{ascending:true}).limit(10);
-  bestRanks={};(data||[]).forEach(r=>bestRanks[r.id]=r.best_rank);
-}
-async function loadSalesCounts(){
-  if(!sb)return;
-  const {data,error}=await sb.rpc("get_product_sales_counts");
-  if(error)return;
-  salesCounts={};(data||[]).forEach(r=>salesCounts[String(r.product_id)]=Number(r.sold_count||0));
 }
 function renderProducts(){
   $("product-grid").innerHTML=products.map(productCard).join("")||'<p class="hint">Chưa có sản phẩm.</p>';
-  $("product-grid").querySelectorAll("[data-buy]").forEach(b=>b.onclick=()=>openBuy(b.dataset.buy));
   const best=products.filter(p=>bestRanks[p.id]!=null).sort((a,b)=>Number(bestRanks[a.id])-Number(bestRanks[b.id])).slice(0,10);
-  $("best-grid").innerHTML=best.length?best.map(p=>productCard(p)).join(""):'<p class="hint">Chưa có sản phẩm bán chạy được xếp hạng.</p>';
-  $("best-grid").querySelectorAll("[data-buy]").forEach(b=>b.onclick=()=>openBuy(b.dataset.buy));
+  $("best-grid").innerHTML=best.length?best.map(productCard).join(""):'<p class="hint">Chưa có sản phẩm bán chạy được xếp hạng.</p>';
+  document.querySelectorAll("[data-buy]").forEach(b=>b.onclick=()=>openBuy(b.dataset.buy));
 }
 async function loadBuyerRanking(){
   const box=$("buyer-rank-grid");
   if(!sb){box.innerHTML='<p class="hint">Chưa kết nối được dữ liệu.</p>';return;}
   const {data,error}=await sb.rpc("get_top_buyers");
-  if(error){box.innerHTML='<p class="hint">Chưa bật chức năng xếp hạng khách hàng trong Supabase.</p>';return;}
+  if(error){box.innerHTML='<p class="hint">Chưa có dữ liệu xếp hạng khách hàng.</p>';return;}
   const rows=(data||[]).slice(0,5);
   box.innerHTML=rows.length?rows.map((b,i)=>`<div class="buyer-card">
     <div class="buyer-rank-no">#${Number(b.rank||i+1)}</div>
@@ -253,49 +260,53 @@ async function loadBuyerRanking(){
     <span>${Number(b.completed_orders||0).toLocaleString("vi-VN")} đơn hoàn tất</span></div>
     <div class="buyer-count">${fmt(b.total_spent)}</div></div>`).join(""):'<p class="hint">Chưa có đơn hoàn tất.</p>';
 }
-
-/* ===== QR ZALOPAY ===== */
-function renderZaloQr(amount,orderCode,type){
-  const title=type==="nap"?"NẠP VÍ ZALOPAY":"THANH TOÁN MUA KEY";
-  return `<div class="qr"><img src="${ZALOPAY_QR}" alt="QR nhận tiền ZaloPay" onerror="this.parentElement.innerHTML='<p style=&quot;color:#111;padding:12px&quot;>Chưa tìm thấy ảnh zalopay-qr.png</p>'"></div>
-    <div><b>${title}</b></div>
-    <div>Số tiền cần thanh toán: <b>${fmt(amount)}</b></div>
-    ${orderCode?`<div style="margin-top:6px">Mã đơn: <span class="code">${escH(orderCode)}</span></div>`:""}
-    <div class="note">Quét mã bằng ZaloPay và kiểm tra đúng người nhận trước khi chuyển tiền. QR cố định có thể yêu cầu bạn tự nhập số tiền. Gửi mã đơn cho admin để đối chiếu.</div>
-    <a class="zalo" href="https://zalo.me/0338432921" target="_blank" rel="noopener">Gửi xác nhận cho admin</a>`;
-}
 function renderPresets(){
   $("presets").innerHTML=PRESETS.map(v=>`<button class="chip" data-v="${v}">${fmt(v)}</button>`).join("");
-  $("presets").querySelectorAll(".chip").forEach(c=>c.onclick=()=>{$("nap-amt").value=c.dataset.v;markPreset()});
+  $("presets").querySelectorAll(".chip").forEach(c=>c.onclick=()=>{$("nap-amt").value=c.dataset.v;markPreset();});
 }
 function markPreset(){
   const v=String(Number($("nap-amt").value));
   $("presets").querySelectorAll(".chip").forEach(c=>c.classList.toggle("on",c.dataset.v===v));
 }
+
+/* ===== Điều hướng ===== */
+function show(s){
+  const map={home:"sec-home",prod:"sec-home",rent:"sec-rent",guides:"sec-guides",downloads:"sec-downloads",nap:"sec-nap",support:"sec-support"};
+  ["sec-home","sec-rent","sec-guides","sec-downloads","sec-nap","sec-support"].forEach(id=>$(id).hidden=id!==map[s]);
+  document.querySelectorAll("nav a").forEach(a=>a.classList.toggle("on",a.dataset.s===s));
+  if(s==="prod") $("product-grid").scrollIntoView({behavior:"smooth"});
+  else window.scrollTo({top:0});
+}
+document.querySelectorAll("nav a").forEach(a=>a.onclick=()=>show(a.dataset.s));
+
+/* ===== Nạp ví ===== */
 function napQR(){
   let amt=Math.round(Number($("nap-amt").value)||0);
   amt=Math.min(500000,Math.max(10000,amt));
-  $("nap-amt").value=amt;markPreset();
-  $("nap-out").innerHTML=renderZaloQr(amt,"","nap");
+  $("nap-amt").value=amt; markPreset();
+  const info="NAP"+rnd(6);
+  $("nap-out").innerHTML=payBlock(amt,info,"NẠP VÍ KEY SUPER VN");
 }
 
-/* ===== MUA KEY ===== */
+/* ===== Mua key ===== */
 function openBuy(id){
   cur=products.find(p=>String(p.id)===String(id));
-  if(!cur)return;
+  if(!cur) return;
   pkgIdx=Math.max(0,(cur.pk||[]).findIndex(x=>Number((cur.pkg_stock||{})[x.l]||0)>0));
-  drawBuy();$("ov").classList.add("open");
+  drawBuy(); $("ov").classList.add("open");
 }
 function drawBuy(){
   const pk=cur.pk?.[pkgIdx];
-  if(!pk){$("modal").innerHTML='<button class="x" onclick="closeModal()">×</button><p class="hint">Sản phẩm chưa có gói giá.</p>';return;}
+  if(!pk){ $("modal").innerHTML='<button class="x" id="xc">×</button><p class="hint">Sản phẩm chưa có gói giá.</p>'; $("xc").onclick=closeModal; return; }
   $("modal").innerHTML=`<button class="x" id="xc">×</button>
     <h2 style="margin:0 0 6px">${escH(cur.name)}</h2>
-    <p class="hint">${escH(cur.desc||"")}</p><label>Chọn gói</label>
+    <p class="hint" style="margin:0 0 6px">${escH(cur.desc||"")}</p>
+    <label>Chọn gói</label>
     <div class="chips">${cur.pk.map((x,i)=>{const n=Number((cur.pkg_stock||{})[x.l]||0);return `<button class="chip ${i===pkgIdx?"on":""}" data-i="${i}" ${n>0?"":"disabled"}>${escH(x.l)} · ${fmt(x.p)} · ${n>0?"còn "+n+" key":"hết"}</button>`}).join("")}</div>
-    <button class="btn" id="mk">Tạo đơn thanh toán ${fmt(pk.p)}</button><div id="pay"></div>`;
+    <button class="btn" id="mk" ${Number((cur.pkg_stock||{})[pk.l]||0)>0?"":"disabled"}>Tạo mã thanh toán ${fmt(pk.p)}</button>
+    <div id="pay"></div>`;
   $("xc").onclick=closeModal;
-  $("modal").querySelectorAll("[data-i]").forEach(b=>b.onclick=()=>{pkgIdx=Number(b.dataset.i);drawBuy()});
+  $("modal").querySelectorAll("[data-i]").forEach(b=>b.onclick=()=>{pkgIdx=Number(b.dataset.i);drawBuy();});
   $("mk").onclick=createOrder;
 }
 function closeModal(){
@@ -306,171 +317,167 @@ $("ov").onclick=e=>{if(e.target.id==="ov")closeModal();};
 
 async function createOrder(){
   const pk=cur.pk[pkgIdx];
-  if(!pk||Number((cur.pkg_stock||{})[pk.l]||0)<=0)return;
+  if(!pk||Number((cur.pkg_stock||{})[pk.l]||0)<=0) return;
   const code="KEY"+rnd(6);
   $("pay").innerHTML='<p class="hint">Đang tạo đơn...</p>';
   if(sb){
     const {data:{session}}=await sb.auth.getSession();
     const uid=session?.user?.id||null;
-    const {error}=await sb.from("orders").insert({
-      code,product:cur.id,pname:cur.name,pkg:pk.l,
-      amount:pk.p,status:"pending",user_id:uid
-    });
-    if(error){
-      $("pay").innerHTML='<p class="hint">Không tạo được đơn. Vui lòng thử lại hoặc nhắn admin.</p>';
-      return;
-    }
+    const {error}=await sb.from("orders").insert({code,product:cur.id,pname:cur.name,pkg:pk.l,amount:pk.p,status:"pending",user_id:uid});
+    if(error){ $("pay").innerHTML='<p class="hint">Không tạo được đơn. Vui lòng thử lại hoặc nhắn admin.</p>'; return; }
   }
-  $("pay").innerHTML=renderZaloQr(pk.p,code,"key")+`
-    <div id="status" class="hint" style="margin-top:10px">⏳ Đang chờ admin xác nhận thanh toán...</div>`;
+  $("pay").innerHTML=payBlock(pk.p,code,"THANH TOÁN MUA KEY")+`
+    <div id="status" class="hint" style="margin-top:10px">⏳ Đang chờ xác nhận thanh toán...</div>
+    <a class="zalo" href="https://zalo.me/0338432921" target="_blank" rel="noopener">Liên hệ admin</a>`;
   watchOrder(code);
 }
 function watchOrder(code){
-  if(!sb)return;
-  if(stopWatch)clearInterval(stopWatch);
+  if(!sb) return;
+  if(stopWatch) clearInterval(stopWatch);
   stopWatch=setInterval(async()=>{
     try{
       const {data}=await sb.rpc("get_order",{p_code:code});
       const o=Array.isArray(data)?data[0]:data;
       if(o&&o.status==="done"&&o.key_value){
-        clearInterval(stopWatch);stopWatch=null;
-        const status=$("status");if(!status)return;
-        status.innerHTML=`<b style="color:var(--ok)">✅ Đơn đã được xác nhận. Key của bạn:</b>
+        clearInterval(stopWatch); stopWatch=null;
+        const st=$("status"); if(!st) return;
+        st.innerHTML=`<b style="color:var(--ok)">✅ Thanh toán thành công! Key của bạn:</b>
           <div class="keybox" style="display:flex;justify-content:space-between;align-items:center;gap:10px">
-          <span id="key-txt">${escH(o.key_value)}</span><button id="copy-btn" class="chip">Copy</button></div>`;
+            <span id="key-txt" style="word-break:break-all">${escH(o.key_value)}</span>
+            <button type="button" id="copy-btn" class="chip">Copy</button>
+          </div>`;
         $("copy-btn").onclick=copyKey;
       }
-    }catch(e){console.warn("Không kiểm tra được trạng thái đơn",e);}
+    }catch(e){ console.warn("Không kiểm tra được đơn",e); }
   },5000);
 }
 async function copyKey(){
   const txt=$("key-txt")?.textContent?.trim();
-  if(!txt)return;
-  try{await navigator.clipboard.writeText(txt);$("copy-btn").textContent="Đã copy ✓";}
-  catch(e){alert("Không copy tự động được. Hãy chọn và sao chép key thủ công.");}
+  if(!txt) return;
+  try{ await navigator.clipboard.writeText(txt); $("copy-btn").textContent="Đã copy ✓"; }
+  catch(e){ alert("Không copy tự động được. Hãy chọn và sao chép key thủ công."); }
 }
 
-/* ===== THUÊ ACC FF ===== */
-async function loadRentals(){
+/* ===== Thuê acc FF ===== */
+function loadRentals(){
   const grid=$("rent-grid");
-  if(!rentalProducts.length){grid.innerHTML='<p class="hint">Chưa có acc FF. Admin hãy thêm sản phẩm có danh mục Thuê acc FF.</p>';return;}
+  if(!rentalProducts.length){ grid.innerHTML='<p class="hint">Chưa có acc FF. Admin hãy thêm sản phẩm có danh mục Thuê acc FF.</p>'; return; }
   grid.innerHTML=rentalProducts.map(a=>{
     const pk=Array.isArray(a.pk)?a.pk:[];
-    const price=pk.length?Math.min(...pk.map(x=>Number(x.p)||0)):Number(a.price||0);
-    const title=a.name||a.title||"Acc Free Fire";
+    const price=pk.length?Math.min(...pk.map(x=>Number(x.p)||0)):0;
     return `<div class="card"><div class="thumb">${a.img?`<img src="${escH(a.img)}" alt="">`:"🎮 FREE FIRE"}</div>
-      <div class="cbody"><h3>${escH(title)}</h3><p>${escH(a.desc||a.description||"")}</p>
+      <div class="cbody"><h3>${escH(a.name||"Acc Free Fire")}</h3><p>${escH(a.desc||"")}</p>
       <div class="price">${price?`Từ ${fmt(price)}`:"Liên hệ giá"}</div>
-      <button class="btn" data-rent="${escH(title)}">Thuê acc</button></div></div>`;
+      <button class="btn" data-rent="${escH(a.name||"")}">Thuê acc</button></div></div>`;
   }).join("");
   grid.querySelectorAll("[data-rent]").forEach(b=>b.onclick=async()=>{
     if(sb){
       const {data:{user}}=await sb.auth.getUser();
-      if(!user){alert("Hãy đăng nhập trước khi thuê acc.");authMode="register";openAuth();return;}
+      if(!user){ alert("Hãy đăng nhập trước khi thuê acc."); authMode="register"; openAuth(); return; }
     }
     alert("Bạn chọn "+b.dataset.rent+". Vui lòng liên hệ admin để xác nhận thời hạn thuê.");
   });
 }
 
-/* ===== HƯỚNG DẪN VÀ LINK TẢI ===== */
+/* ===== Hướng dẫn & link tải ===== */
 async function loadExtras(){
-  if(!sb)return;
+  if(!sb) return;
   const [g,d]=await Promise.all([
     sb.from("guide_videos").select("*").eq("is_published",true).order("created_at",{ascending:false}),
     sb.from("software_downloads").select("*").eq("is_published",true).order("created_at",{ascending:false})
   ]);
-  $("guide-grid").innerHTML=(g.data||[]).map(x=>`<div class="card"><div class="cbody"><h3>${escH(x.title)}</h3><p>${escH(x.description)}</p>${x.video_url?`<video src="${escH(x.video_url)}" controls playsinline style="width:100%;border-radius:12px"></video>`:""}</div></div>`).join("")||'<p class="hint">Chưa có hướng dẫn.</p>';
+  $("guide-grid").innerHTML=(g.data||[]).map(x=>`<div class="card"><div class="cbody"><h3>${escH(x.title)}</h3><p>${escH(x.description)}</p>${x.video_url?`<video src="${escH(x.video_url)}" controls playsinline preload="metadata" style="width:100%;border-radius:12px;background:#000"></video>`:""}</div></div>`).join("")||'<p class="hint">Chưa có hướng dẫn.</p>';
   $("download-grid").innerHTML=(d.data||[]).map(x=>{
     const url=/^https?:\/\//i.test(x.download_url||"")?x.download_url:"#";
-    return `<div class="card"><div class="cbody"><h3>${escH(x.title)}</h3><p>${escH(x.description)}</p><a class="btn" href="${escH(url)}" target="_blank" rel="noopener">Tải phần mềm</a></div></div>`;
+    return `<div class="card">${x.image_url?`<div class="thumb"><img src="${escH(x.image_url)}" alt=""></div>`:""}<div class="cbody"><h3>${escH(x.title)}</h3><p>${escH(x.description)}</p><a class="btn" href="${escH(url)}" target="_blank" rel="noopener noreferrer" style="display:block;text-align:center;text-decoration:none">Tải phần mềm</a></div></div>`;
   }).join("")||'<p class="hint">Chưa có link tải.</p>';
 }
 
-/* ===== ĐĂNG NHẬP / ĐĂNG KÝ ===== */
-let authMode="login";
-function openAuth(){ $("auth-ov").classList.add("open");drawAuth(); }
+/* ===== Đăng ký / đăng nhập khách ===== */
+function openAuth(){ $("auth-ov").classList.add("open"); drawAuth(); }
 function closeAuth(){ $("auth-ov").classList.remove("open"); }
 function drawAuth(msg=""){
   const reg=authMode==="register";
   $("auth-modal").innerHTML=`<button class="x" id="ax">×</button>
-    <h2>${reg?"Tạo tài khoản Key Super VN":"Đăng nhập Key Super VN"}</h2>
+    <h2 style="margin:0 0 6px">${reg?"Tạo tài khoản Key Super VN":"Đăng nhập Key Super VN"}</h2>
+    <p class="hint" style="margin:0 0 10px">${reg?"Đăng ký để theo dõi đơn hàng và nhận hỗ trợ nhanh hơn.":"Đăng nhập bằng email và mật khẩu đã đăng ký."}</p>
     ${reg?'<label>Tên hiển thị</label><input id="a-name" placeholder="Tên của bạn">':""}
     <label>Email</label><input id="a-email" type="email" placeholder="ban@email.com" autocomplete="email">
-    <label>Mật khẩu</label><input id="a-pass" type="password" placeholder="Ít nhất 6 ký tự">
-    ${reg?'<label>Xác nhận mật khẩu</label><input id="a-pass2" type="password">':""}
-    <button class="btn" id="a-submit">${reg?"Tạo tài khoản":"Đăng nhập"}</button>
-    <p class="hint" id="a-msg">${escH(msg)}</p>
-    <p class="hint">${reg?'Đã có tài khoản? <a href="#" id="a-switch">Đăng nhập</a>':'Chưa có tài khoản? <a href="#" id="a-switch">Đăng ký</a>'}</p>`;
+    <label>Mật khẩu</label><input id="a-pass" type="password" placeholder="Ít nhất 6 ký tự" autocomplete="${reg?"new-password":"current-password"}">
+    ${reg?'<label>Xác nhận mật khẩu</label><input id="a-pass2" type="password" placeholder="Nhập lại mật khẩu">':""}
+    <button class="btn" id="a-submit" style="margin-top:14px">${reg?"Tạo tài khoản":"Đăng nhập"}</button>
+    <p class="hint" id="a-msg" style="margin-top:10px">${escH(msg)}</p>
+    <p class="hint" style="text-align:center;margin-top:12px">${reg?'Đã có tài khoản? <a href="#" id="a-switch" style="color:var(--acc)">Đăng nhập</a>':'Chưa có tài khoản? <a href="#" id="a-switch" style="color:var(--acc)">Đăng ký</a>'}</p>`;
   $("ax").onclick=closeAuth;
   $("a-switch").onclick=e=>{e.preventDefault();authMode=reg?"login":"register";drawAuth();};
   $("a-submit").onclick=submitAuth;
 }
 async function submitAuth(){
-  if(!sb){$("a-msg").textContent="Chưa kết nối hệ thống.";return;}
-  const email=$("a-email").value.trim(),password=$("a-pass").value;
-  if(!email||!password){$("a-msg").textContent="Nhập email và mật khẩu.";return;}
+  if(!sb) return $("a-msg").textContent="Chưa kết nối hệ thống. Vui lòng thử lại sau.";
+  const email=$("a-email").value.trim(), pass=$("a-pass").value;
+  if(!email||!pass) return $("a-msg").textContent="Nhập email và mật khẩu.";
   if(authMode==="register"){
     const name=$("a-name").value.trim();
-    if(!name){$("a-msg").textContent="Nhập tên hiển thị.";return;}
-    if(password.length<6){$("a-msg").textContent="Mật khẩu cần ít nhất 6 ký tự.";return;}
-    if(password!==$("a-pass2").value){$("a-msg").textContent="Mật khẩu xác nhận không khớp.";return;}
-    const {data,error}=await sb.auth.signUp({email,password,options:{data:{name}}});
-    if(error){$("a-msg").textContent="Lỗi: "+error.message;return;}
-    if(data.session){closeAuth();return;}
-    $("a-msg").textContent="Đã gửi email xác nhận. Kiểm tra hộp thư rồi đăng nhập.";
+    if(!name) return $("a-msg").textContent="Nhập tên hiển thị.";
+    if(pass.length<6) return $("a-msg").textContent="Mật khẩu cần ít nhất 6 ký tự.";
+    if(pass!==$("a-pass2").value) return $("a-msg").textContent="Mật khẩu xác nhận không khớp.";
+    const {data,error}=await sb.auth.signUp({email,password:pass,options:{data:{name}}});
+    if(error) return $("a-msg").textContent="Lỗi: "+error.message;
+    if(data.session){ closeAuth(); return; }
+    return $("a-msg").textContent="Đã gửi email xác nhận. Vui lòng kiểm tra hộp thư rồi đăng nhập.";
   }else{
-    const {error}=await sb.auth.signInWithPassword({email,password});
-    if(error){$("a-msg").textContent="Email hoặc mật khẩu không đúng.";return;}
+    const {error}=await sb.auth.signInWithPassword({email,password:pass});
+    if(error) return $("a-msg").textContent="Email hoặc mật khẩu không đúng.";
     closeAuth();
   }
 }
 function renderAuthBar(user){
-  $("auth-btn").hidden=!!user;$("logout-btn").hidden=!user;$("hist-btn").hidden=!user;
+  $("auth-btn").hidden=!!user;
+  $("logout-btn").hidden=!user;
+  $("hist-btn").hidden=!user;
   $("auth-name").textContent=user?"Xin chào, "+(user.user_metadata?.name||user.email):"";
 }
 async function initAuth(){
-  if(!sb)return;
+  if(!sb) return;
   const {data}=await sb.auth.getSession();
   renderAuthBar(data?.session?.user||null);
   sb.auth.onAuthStateChange((_e,session)=>renderAuthBar(session?.user||null));
 }
 $("auth-btn").onclick=()=>{authMode="login";openAuth();};
-$("logout-btn").onclick=async()=>{if(sb)await sb.auth.signOut();};
-$("auth-ov").onclick=e=>{if(e.target.id==="auth-ov")closeAuth();};
+$("logout-btn").onclick=async()=>{ if(sb) await sb.auth.signOut(); };
+$("auth-ov").onclick=e=>{ if(e.target.id==="auth-ov") closeAuth(); };
 
-/* ===== LỊCH SỬ MUA ===== */
+/* ===== Lịch sử mua hàng ===== */
 async function openHistory(){
-  if(!sb)return;
+  if(!sb) return;
   const {data,error}=await sb.from("orders").select("code,pname,pkg,amount,status,key_value,created").order("created",{ascending:false}).limit(50);
   const rows=error?[]:(data||[]);
-  $("hist-modal").innerHTML=`<button class="x" id="hx">×</button><h2>Lịch sử mua hàng</h2>
-    ${error?`<p class="hint">${escH(error.message)}</p>`:""}
+  $("hist-modal").innerHTML=`<button class="x" id="hx">×</button>
+    <h2 style="margin:0 0 10px">Lịch sử mua hàng</h2>
+    ${error?`<p class="hint" style="color:var(--bad)">Lỗi tải lịch sử: ${escH(error.message)}</p>`:""}
     ${rows.length?rows.map(o=>`<div style="border-bottom:1px solid var(--line);padding:12px 0">
-      <b>${escH(o.pname)}</b> · ${escH(o.pkg)}
-      <div class="hint">${fmt(o.amount)} · ${o.status==="done"?"Đã giao key":"Chờ thanh toán"}</div>
-      <div class="code" style="font-size:14px;word-break:break-all">${o.status==="done"?escH(o.key_value):"Mã đơn: "+escH(o.code)}</div>
-    </div>`).join(""):'<p class="hint">Chưa có đơn hàng nào.</p>'}`;
+      <div><b>${escH(o.pname)}</b> · ${escH(o.pkg)}</div>
+      <div class="hint">${fmt(o.amount)} · ${new Date(o.created).toLocaleString("vi-VN")} · <span style="color:${o.status==="done"?"var(--ok)":"var(--mute)"}">${o.status==="done"?"Đã giao key":"Chờ thanh toán"}</span></div>
+      <div class="code" style="font-size:14px;margin-top:4px;word-break:break-all">${o.status==="done"?escH(o.key_value):"Mã đơn: "+escH(o.code)}</div>
+    </div>`).join(""):(error?"":'<p class="hint">Bạn chưa có đơn hàng nào.</p>')}`;
   $("hx").onclick=()=>$("hist-ov").classList.remove("open");
   $("hist-ov").classList.add("open");
 }
 $("hist-btn").onclick=openHistory;
-$("hist-ov").onclick=e=>{if(e.target.id==="hist-ov")$("hist-ov").classList.remove("open");};
+$("hist-ov").onclick=e=>{ if(e.target.id==="hist-ov") $("hist-ov").classList.remove("open"); };
 
-/* ===== KHỞI ĐỘNG ===== */
-renderPresets();
-markPreset();
+/* ===== Khởi động ===== */
+renderPresets(); markPreset();
 $("nap-btn").onclick=napQR;
 $("nap-amt").oninput=markPreset;
 initAuth();
-
 (async()=>{
   await loadProducts();
   await loadBestRanks();
-  await loadSalesCounts();
   renderProducts();
   await loadBuyerRanking();
   await loadExtras();
-  await loadRentals();
+  loadRentals();
 })();
 </script>
 </body>
